@@ -6,6 +6,10 @@ export const fetchProducts = () => axios.get(`${API_BASE_URL}/products`);
 export const createProduct = (productsData: any) =>
   axios.post(`${API_BASE_URL}/products`, productsData);
 
+export const fetchCategories = () => axios.get(`${API_BASE_URL}/category`);
+export const createCategory = (categoryData: any) =>
+  axios.post(`${API_BASE_URL}/category`, categoryData);
+
 export const fetchPaymentMethods = () => axios.get(`${API_BASE_URL}/paymentmethods`);
 export const createTransaction = (transactionData: any) =>
   axios.post(`${API_BASE_URL}/transactions`, transactionData);

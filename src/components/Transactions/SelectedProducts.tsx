@@ -1,6 +1,14 @@
 ﻿import React, { useState } from 'react';
 import ConfirmTransaction from './ConfirmTransaction';
 import { createTransaction, updateTransaction } from '../../services/api';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button, TextField } from '@mui/material';
+import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
+import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+import Stack from '@mui/material/Stack';
+import ClearAllIcon from '@mui/icons-material/ClearAll';
+import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 
 interface ParkedTransaction {
   id: number;
@@ -8,7 +16,7 @@ interface ParkedTransaction {
   guestName:string
   paid: boolean;
   totalAmount: number;
-  paymentMethodId: number;
+  paymentMethodId: string;
   transactionDetails: SelectedProduct[];
 }
 
@@ -45,11 +53,11 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [tableNo, setTableNo] = useState(selectedTransaction?.tableNo || ""); // Default from transaction
   const [guestName, setGuestName] = useState(selectedTransaction?.guestName || ""); // Default from transaction
-  const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction?.paymentMethodId || 1); // Selected payment method
+  const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction?.paymentMethodId || "1"); // Selected payment method
   const [paymentMethods, setPaymentMethods] = useState([
-    { id: 1, name: 'Cash' },
-    { id: 2, name: 'Credit Card' },
-    { id: 3, name: 'Digital Wallet' },
+    { id: "1", name: 'Cash' },
+    { id: "2", name: 'Credit Card' },
+    { id: "3", name: 'Digital Wallet' },
   ]); // Example payment methods
 
   // const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -101,9 +109,6 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
           })),
         }
       : basePayload;
-
-      console.log(basePayload);
-      console.log(transactionPayload);
   
     try {
       let response;
@@ -122,7 +127,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       onClearProductsAndTransactions();
       setTableNo('');
       setGuestName('');
-      setPaymentMethod(1);
+      setPaymentMethod("1");
     } catch (error) {
       console.error('Error saving transaction:', error);
       alert('Failed to save transaction. Please try again.');
@@ -130,93 +135,72 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   };
   
   return (
-    <React.Fragment>
-       {/* Button Container */}
-       <div style={{ display: 'flex', gap: '10px'}}>
-            {/* Proceed Button */}
-            <button
-              disabled={products.length === 0} // Disable if no product is selected
-              onClick={() => setIsModalOpen(true)}
-              style={{
-                padding: '10px',
-                cursor: products.length === 0 ? 'not-allowed' : 'pointer',
-                width: '75%', // Adjusted width for Proceed button
-                backgroundColor: products.length === 0 ? '#b7bdb5' : '#74c45e', // Pastel red for enabled state, lighter for disabled
-                color: products.length === 0 ? '#aaa' : 'white', // Adjust text color based on state
-              }}
-            >
-              <strong>Total Items:</strong>{' '}
-              {products.reduce((sum, product) => sum + product.quantity, 0)}
-              {` - Rp ${products
-                .reduce((sum, product) => sum + product.price * product.quantity, 0)
-                .toFixed(2)}`}
-            </button>
-
-            {/* Batal Pesanan Button */}
-            <button
-              onClick={onClearProductsAndTransactions} // Clear selected products
-              disabled={products.length === 0} // Disable if no product is selected
-              style={{
-                cursor: products.length === 0 ? 'not-allowed' : 'pointer',
-                width: '25%', // Smaller width for Batal Pesanan button
-                backgroundColor: products.length === 0 ? '#f4d4d4' : '#ff6b6b', // Pastel red for enabled state, lighter for disabled
-                color: products.length === 0 ? '#aaa' : 'white', // Adjust text color based on state
-                border: 'none',
-                opacity: products.length === 0 ? 0.6 : 1, // Optional: for visual feedback
-              }}
-            >
-              Batal Pesanan
-            </button>
-          </div>
-            <table style={{ width: '100%', textAlign: 'left', overflowY: 'scroll'}}>
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Qty</th>
-                  <th>Total</th>
-                  <th></th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>{product.name}</td>
-                    <td>{product.quantity}</td>
-                    <td>{product.price * product.quantity}</td>
-                    <td>
-                    <button onClick={() => onUpdateQuantity(product.id, product.quantity - 1)}>-</button>
-                    <button onClick={() => onUpdateQuantity(product.id, product.quantity + 1)}>+</button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-
-            {/* Transaction Note Field */}
-              {products.length > 0 && (
-                <div style={{ marginTop: '20px' }}>
-                  <label
-                    htmlFor="transactionNote"
-                    style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}
-                  >
-                    Transaction Note:
-                  </label>
-                  <textarea
-                    id="transactionNote"
-                    value={note}
-                    onChange={(e) => onUpdateTransactionNote(e.target.value)}
-                    style={{
-                      width: '100%',
-                      height: '80px',
-                      padding: '10px',
-                      border: '1px solid #ccc',
-                      borderRadius: '5px',
-                    }}
-                  ></textarea>
-                </div>
-              )}
-
+    <Box >
+			<Stack spacing={2}>
+				<Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap' }}>
+					<Button 
+						variant="contained" 
+						color="success"
+						disabled={products.length === 0}
+						onClick={() => {setIsModalOpen(true)}}
+						startIcon={<ShoppingCartCheckoutIcon />}>
+						Total Items:{' '}
+								{products.reduce((sum, product) => sum + product.quantity, 0)}
+								{` - Rp ${products
+									.reduce((sum, product) => sum + product.price * product.quantity, 0)
+									.toFixed(2)}`}
+					</Button>
+					<Button 
+						variant="contained" 
+						color="error"
+						disabled={products.length === 0}
+						onClick={() => {onClearProductsAndTransactions()}}
+						startIcon={<ClearAllIcon />}>
+						Cancel Order
+					</Button>
+				</Stack>
+        <Box sx={{
+      mb: 2,
+      display: "flex",
+      flexDirection: "column",
+      height: 500
+     // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
+    }}>
+    <TableContainer component={Paper}>
+						<Table>
+							<TableBody>
+							{products.map((product) => (
+								<TableRow key={product.id}>
+									<TableCell>{product.name}</TableCell>
+									<TableCell>{product.quantity}</TableCell>
+									<TableCell>{product.price * product.quantity}</TableCell>
+									<TableCell>
+										<IconButton aria-label="substract" onClick={() => onUpdateQuantity(product.id, product.quantity - 1)}>
+											<ArrowCircleDownIcon />
+										</IconButton>
+										<IconButton aria-label="add" onClick={() => onUpdateQuantity(product.id, product.quantity + 1)}>
+											<ArrowCircleUpIcon />
+										</IconButton>
+										
+									</TableCell>
+									
+								</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</TableContainer>
+        </Box>
+				
+					<TextField
+						id="transactionNote"
+						label="Order Note"
+						multiline
+						maxRows={4}
+						onChange={(e) => onUpdateTransactionNote(e.target.value)}
+						value={note}
+						disabled={products.length <= 0}
+					/>
+			</Stack>
         {/* ConfirmTransaction Modal */}
         <ConfirmTransaction
           note={note} // Pass the transaction note
@@ -233,7 +217,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
           handlePaymentMethodChange={setPaymentMethod}
           handleProceedTransaction={handleProceedTransaction}
         />
-    </React.Fragment>
+    </Box>
   );
 };
 

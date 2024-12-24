@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import UserManagement from './UserManagement';
-import ProductManagement from './ProductManagement';
+import ProductList from './components/Transactions/ProductList';
 import TransactionMain from './components/Transactions/TransactionMain';
 import HistoryTransactions from './components/Transactions/HistoryTransactions';
 import AppTheme from './theme/AppTheme';
@@ -17,7 +17,7 @@ const App: React.FC = () => {
           <h1>Coffee Shop Management App</h1>
           {/* Navigation Buttons */}
             <div style={{ marginBottom: '20px' }}>
-              <Link to="/product-management" style={{ marginRight: '10px' }}><button>Products</button></Link>
+              <Link to="/products" style={{ marginRight: '10px' }}><button>Products</button></Link>
               <Link to="/user-management" style={{ marginRight: '10px' }}><button>Users</button></Link>
               <Link to="/transactions" style={{ marginRight: '10px' }}><button>Transactions</button></Link>
               <Link to="/history-transactions" style={{ marginRight: '10px' }}><button>History Transactions</button></Link>
@@ -26,15 +26,13 @@ const App: React.FC = () => {
             </div>
           <Routes>
             <Route path="/user-management" element={<UserManagement />} />
-            <Route path="/product-management" element={<ProductManagement />} />
+            <Route path="/products" element={<ProductList />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/payment-method-management" element={<PaymentMethodManagement />} />
             <Route path="/transactions" element={<TransactionMain />} />
             <Route path="/history-transactions" element={<HistoryTransactions />} />
             <Route path="/" element={<div>Welcome to the Coffee Shop Management App</div>} />
           </Routes>
-          
-        
       </Router>
     </AppTheme>
   );
