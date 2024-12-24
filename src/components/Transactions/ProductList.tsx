@@ -4,7 +4,7 @@ import Grid from '@mui/material/Grid2'
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
+import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
 import { Button, MenuItem } from '@mui/material';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -16,13 +16,27 @@ import ImageListItem from '@mui/material/ImageListItem';
 import { ImageListItemBar } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
 
+// import ListSubheader from '@mui/material/ListSubheader';
+// import List from '@mui/material/List';
+// import ListItemButton from '@mui/material/ListItemButton';
+// import ListItemIcon from '@mui/material/ListItemIcon';
+// import ListItemText from '@mui/material/ListItemText';
+// import Collapse from '@mui/material/Collapse';
+// import InboxIcon from '@mui/icons-material/MoveToInbox';
+// import DraftsIcon from '@mui/icons-material/Drafts';
+// import SendIcon from '@mui/icons-material/Send';
+// import ExpandLess from '@mui/icons-material/ExpandLess';
+// import ExpandMore from '@mui/icons-material/ExpandMore';
+// import StarBorder from '@mui/icons-material/StarBorder';
+
 const ProductList: React.FC = () => {
 	const [products, setProducts] = useState<any[]>([]);
 	const [categories, setCategories] = useState<any[]>([]);
 	const [newProduct, setNewProduct] = useState({ name: '', price: '', victual:'', category:''});
-	const [newCategory, setNewCategory] = useState({ name: '', description: ''});
+	const [newCategory, setNewCategory] = useState({ name: '', description: '', open:false});
 	const [loading, setLoading] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
+	// const [open, setOpen] = React.useState(true);
 
 	useEffect(() => {
 		const loadProducts = async () => {
@@ -72,7 +86,7 @@ const ProductList: React.FC = () => {
 	const handleAddCategory = async () => {
 		try {
 			await createCategory(newCategory);
-			setNewCategory({ name: '', description: ''});
+			setNewCategory({ name: '', description: '', open:false});
 			handleFetchCategory();
 		} catch (error) {
 			console.error('Error adding product:', error);
@@ -179,7 +193,7 @@ const ProductList: React.FC = () => {
 								disablePortal
 								options={categories.map((cat)=>cat.name)}
 								sx={{ width: 500 }}
-								onChange={(e: any, newValue: string) => {
+								onChange={(_e: any, newValue: string) => {
 									setNewProduct({ ...newProduct, category: newValue })
 								}}
 								renderInput={(newProduct) => <TextField {...newProduct} label="Category" variant="standard" required

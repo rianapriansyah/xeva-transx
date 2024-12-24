@@ -54,13 +54,13 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   const [tableNo, setTableNo] = useState(selectedTransaction?.tableNo || ""); // Default from transaction
   const [guestName, setGuestName] = useState(selectedTransaction?.guestName || ""); // Default from transaction
   const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction?.paymentMethodId || "1"); // Selected payment method
-  const [paymentMethods, setPaymentMethods] = useState([
-    { id: "1", name: 'Cash' },
-    { id: "2", name: 'Credit Card' },
-    { id: "3", name: 'Digital Wallet' },
-  ]); // Example payment methods
+  // const [paymentMethods, setPaymentMethods] = useState([
+  //   { id: "1", name: 'Cash' },
+  //   { id: "2", name: 'Credit Card' },
+  //   { id: "3", name: 'Digital Wallet' },
+  // ]); // Example payment methods
 
-  // const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [paymentMethods] = useState<any[]>([]);
 
   const onClearProductsAndTransactions = () => {
     onClearProducts();
@@ -160,13 +160,13 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
 					</Button>
 				</Stack>
         <Box sx={{
-      mb: 2,
-      display: "flex",
-      flexDirection: "column",
-      height: 500
-     // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
-    }}>
-    <TableContainer component={Paper}>
+            mb: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: 500
+          // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
+          }}>
+          <TableContainer component={Paper}>
 						<Table>
 							<TableBody>
 							{products.map((product) => (
@@ -181,42 +181,39 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
 										<IconButton aria-label="add" onClick={() => onUpdateQuantity(product.id, product.quantity + 1)}>
 											<ArrowCircleUpIcon />
 										</IconButton>
-										
 									</TableCell>
-									
 								</TableRow>
 								))}
 							</TableBody>
 						</Table>
 					</TableContainer>
         </Box>
-				
-					<TextField
-						id="transactionNote"
-						label="Order Note"
-						multiline
-						maxRows={4}
-						onChange={(e) => onUpdateTransactionNote(e.target.value)}
-						value={note}
-						disabled={products.length <= 0}
-					/>
-			</Stack>
-        {/* ConfirmTransaction Modal */}
-        <ConfirmTransaction
-          note={note} // Pass the transaction note
-          isModalOpen={isModalOpen}
-          selectedProducts={products}
-          selectedTransaction={selectedTransaction}
-          tableNo={tableNo}
-          guestName={guestName}
-          paymentMethods={paymentMethods}
-          paymentMethodId={paymentMethodId}
-          onCloseModal={() => setIsModalOpen(false)} // Close modal handler
-          setTableNo={setTableNo}
-          setGuestName={setGuestName}
-          handlePaymentMethodChange={setPaymentMethod}
-          handleProceedTransaction={handleProceedTransaction}
+        <TextField
+          id="transactionNote"
+          label="Order Note"
+          multiline
+          maxRows={4}
+          onChange={(e) => onUpdateTransactionNote(e.target.value)}
+          value={note}
+          disabled={products.length <= 0}
         />
+			</Stack>
+      {/* ConfirmTransaction Modal */}
+      <ConfirmTransaction
+        note={note} // Pass the transaction note
+        isModalOpen={isModalOpen}
+        selectedProducts={products}
+        selectedTransaction={selectedTransaction}
+        tableNo={tableNo}
+        guestName={guestName}
+        paymentMethods={paymentMethods}
+        paymentMethodId={paymentMethodId}
+        onCloseModal={() => setIsModalOpen(false)} // Close modal handler
+        setTableNo={setTableNo}
+        setGuestName={setGuestName}
+        handlePaymentMethodChange={setPaymentMethod}
+        handleProceedTransaction={handleProceedTransaction}
+      />
     </Box>
   );
 };

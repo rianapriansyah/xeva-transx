@@ -9,6 +9,9 @@ import { styled } from '@mui/material/styles';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { ImageListItemBar } from '@mui/material';
+import IconButton from '@mui/material/IconButton';
+import Grid from '@mui/material/Grid2'
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
 
 
 interface AvailableProductsProps {
@@ -23,7 +26,8 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 	useEffect(() => {
 		const newProduct = {
 			name: 'Add New Product',
-			id:99999
+			id:99999,
+			category:""
 		};
 
 		const loadProducts = async () => {
@@ -100,7 +104,16 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 	return (
 		<Box>
 			<Stack spacing={2}>
-				<TextField id="outlined-basic" label="Search products..." variant="outlined" onChange={(e) => setSearchQuery(e.target.value)}/>
+				<Stack spacing={2} direction="row">
+					<Grid size={10}>
+					<TextField id="outlined-basic" label="Search products..." variant="outlined" fullWidth onChange={(e) => setSearchQuery(e.target.value)}/>
+					</Grid>
+					<Grid size={2}>
+					<IconButton aria-label="delete" size="large">
+						<FilterAltIcon fontSize="inherit" />
+					</IconButton>
+					</Grid>
+				</Stack>
 				<Box sx={{
           mb: 2,
           display: "flex",
@@ -110,8 +123,10 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
         }}>
 					<ImageList cols={3} rowHeight={164}>
 					{products.filter((product) =>
-								product.name.toLowerCase().includes(searchQuery.toLowerCase())
+								product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+								product.category.toLowerCase().includes(searchQuery.toLowerCase())
 							).map((product) => (
+								
 							<ImageListItem key={product.id}>
 								<ImageButton focusRipple>
 									<ImageBackdrop className="MuiImageBackdrop-root" />
