@@ -1,6 +1,6 @@
 ﻿import axios from 'axios';
 
-const API_BASE_URL = 'http://195.35.45.202/api';
+const API_BASE_URL = 'https://srv664937.hstgr.cloud/api';
 
 export const fetchProducts = () => axios.get(`${API_BASE_URL}/products`);
 export const createProduct = (productsData: any) =>
