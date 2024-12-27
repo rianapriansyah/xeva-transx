@@ -16,7 +16,7 @@ interface ParkedTransaction {
   guestName:string
   paid: boolean;
   totalAmount: number;
-  paymentMethodId: string;
+  paymentMethodId: number;
   transactionDetails: SelectedProduct[];
 }
 
@@ -34,38 +34,29 @@ interface SelectedProductsProps {
   products: SelectedProduct[];
   selectedTransaction:ParkedTransaction;
   onUpdateQuantity: (id: number, newQuantity: number) => void;
-  onClearProducts: () => void;
-  onClearTransactions: () => void;
+  onCancelOrder: () => void;
   onUpdateTransactionNote: (note: string) => void; // Add a handler for transaction note
   note: string; // The transaction note state
+  paymentMethods:any
 }
 
 const SelectedProducts: React.FC<SelectedProductsProps> = ({
   products,
   selectedTransaction,
   onUpdateQuantity,
-  onClearProducts,
-  onClearTransactions,
+  onCancelOrder,
   onUpdateTransactionNote,
   note,
+  paymentMethods
 }) => {
 
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [tableNo, setTableNo] = useState(selectedTransaction?.tableNo || ""); // Default from transaction
   const [guestName, setGuestName] = useState(selectedTransaction?.guestName || ""); // Default from transaction
-  const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction?.paymentMethodId || "1"); // Selected payment method
-  // const [paymentMethods, setPaymentMethods] = useState([
-  //   { id: "1", name: 'Cash' },
-  //   { id: "2", name: 'Credit Card' },
-  //   { id: "3", name: 'Digital Wallet' },
-  // ]); // Example payment methods
-
-  const [paymentMethods] = useState<any[]>([]);
+  const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction?.paymentMethodId || 1); // Selected payment method
 
   const onClearProductsAndTransactions = () => {
-    onClearProducts();
-    onClearTransactions();
-    onUpdateTransactionNote("");
+    onCancelOrder();
   };
 
   const handleProceedTransaction = async (paid: boolean) => {
@@ -127,7 +118,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       onClearProductsAndTransactions();
       setTableNo('');
       setGuestName('');
-      setPaymentMethod("1");
+      setPaymentMethod(1);
     } catch (error) {
       console.error('Error saving transaction:', error);
       alert('Failed to save transaction. Please try again.');

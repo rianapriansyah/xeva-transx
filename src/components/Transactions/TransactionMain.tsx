@@ -1,4 +1,5 @@
-﻿import React, { useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
+import  * as api from '../../services/api';
 import axios from 'axios';
 import AvailableProducts from './AvailableProducts';
 import SelectedProducts from './SelectedProducts';
@@ -28,13 +29,27 @@ const TransactionMain: React.FC = () => {
 	const [parkedTransactions, setParkedTransactions] = useState<any[]>([]);
 	const [selectedParkedTransaction, setSelectedParkedTransaction] = useState<any | null>(null);
 	const [note, setTransactionNote] = useState("");
+	const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
 
+	useEffect(() => {
+		fetchPaymentMethods();
+	}, []);
 
 	// Fetch parked transactions
 	const fetchParkedTransactions = async () => {
 		try {
 			const response = await axios.get('http://localhost:5101/api/transactions/unpaid');
 			setParkedTransactions(response.data);
+		} catch (error) {
+			console.error('Error fetching parked transactions:', error);
+		}
+	};
+
+	// Fetch parked transactions
+	const fetchPaymentMethods = async () => {
+		try {
+			const response = await api.fetchPaymentMethods();
+			setPaymentMethods(response.data);
 		} catch (error) {
 			console.error('Error fetching parked transactions:', error);
 		}
@@ -83,12 +98,10 @@ const TransactionMain: React.FC = () => {
 		//console.log(id);
 	};
 
-	const handleClearProducts = () => {
+	const handleCancelOrder = () => {
 		setSelectedProducts([]);
-	};
-
-	const handleClearTransactions = () => {
 		setSelectedParkedTransaction(null);
+		setPaymentMethods([]);
 	};
 
 	const onClickShowParkedTransactions = () => {
@@ -111,10 +124,10 @@ const TransactionMain: React.FC = () => {
 							products={selectedProducts}
 							selectedTransaction={selectedParkedTransaction} // Pass the entire transaction object
 							onUpdateQuantity={handleUpdateQuantity}
-							onClearProducts={handleClearProducts}
-							onClearTransactions={handleClearTransactions}
+							onCancelOrder={handleCancelOrder}
 							note={note} // Pass the transaction note
 							onUpdateTransactionNote={setTransactionNote} // Pass the update handler
+							paymentMethods = {paymentMethods}
 						/>
 					</Stack>
 				</Grid>				
