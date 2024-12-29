@@ -3,18 +3,10 @@ import {
     Dialog,
     DialogActions,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     TextField,
     Box,
     Stack,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableRow,
-    Paper,
-    TableFooter,
     Typography,
     Button,
     FormControl,
@@ -28,6 +20,9 @@ import {
 		ImageList,
 		ImageListItem,
 		List,
+		ListItemText,
+		ListItem,
+		Divider,
 } from '@mui/material';
 
 interface ParkedTransaction {
@@ -118,10 +113,10 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 
 	const ImageButton = styled(ButtonBase)(({ theme }) => ({
 		position: 'relative',
-		height: 70,
+		height: 100,
 		[theme.breakpoints.down('sm')]: {
 			width: '100% !important', // Overrides inline-style
-			height: 60,
+			height: 100,
 		},
 		'&:hover, &.Mui-focusVisible': {
 			zIndex: 1,
@@ -151,51 +146,22 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 
 	const ImageBackdrop = styled('span')(({ theme }) => ({
 		position: 'absolute',
-		left: 0,
-		right: 0,
-		top: 0,
-		bottom: 0,
+		left: 1,
+		right: 1,
+		top: 3,
+		bottom: 3,
+		borderRadius:2,
 		backgroundColor: theme.palette.common.black,
 		opacity: 0.4,
 		transition: theme.transitions.create('opacity'),
 	}));
 
-	// const connect = async () => {
-	// 	try {
-	// 		const device = await navigator.bluetooth.requestDevice({
-	// 			acceptAllDevices: true,
-	// 			optionalServices: ['printer'], // Replace with your printer's service UUID
-	// 		});
-
-	// 		const server = await device.gatt?.connect();
-	// 		const service = await server?.getPrimaryService('printer'); // Replace with your printer's service UUID
-	// 		const characteristic = await service?.getCharacteristic('write'); // Replace with your printer's characteristic UUID
-
-	// 		const encoder = new TextEncoder();
-	// 		const recipe = `
-	// 				Your Coffee Shop
-	// 				----------------
-	// 				Item       Qty   Price
-	// 				Coffee      1     $3.00
-	// 				Total:            $3.00
-	// 		`;
-	// 		const command = encoder.encode(recipe);
-
-	// 		await characteristic?.writeValue(command);
-	// 		alert('Recipe printed successfully!');
-	// 		} catch (error) {
-	// 			console.error('Error:', error);
-	// 			alert('Failed to print recipe. See console for details.');
-	// 	}
-	// };
-
 	return (
 		<Dialog open={isModalOpen} onClose={onCloseModal}>
-			<DialogTitle>Confirm Transaction</DialogTitle>
+			<DialogTitle>Confirm the transaction details below</DialogTitle>
 			<DialogContent>
 				<Box sx={{ flexGrow: 1 }}>
 					<Stack spacing={2}>
-						<DialogContentText>Confirm the transaction details below.</DialogContentText>
 						<Stack spacing={2} direction="row">
 								<TextField
 										autoFocus
@@ -225,38 +191,64 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 										onChange={(e) => setGuestName(e.target.value)}
 								/>
 						</Stack>
-						<TableContainer component={Paper}>
-							<Table aria-label="simple table">
-								<TableBody>
-									{selectedProducts.map((product) => (
-										<TableRow key={product.id}>
-											<TableCell component="th" scope="row">{product.name}</TableCell>
-											<TableCell>{product.quantity}</TableCell>
-											<TableCell>{product.price * product.quantity}</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-								<TableFooter>
-									<TableRow>
-										<TableCell>Total Item</TableCell>
-										<TableCell>
-												{selectedProducts.reduce((sum, product) => sum + product.quantity, 0)}
-										</TableCell>
-									</TableRow>
-									<TableRow>
-										<TableCell>Total Price</TableCell>
-										<TableCell>
-												{`Rp ${selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0)}`}
-										</TableCell>
-									</TableRow>
-								</TableFooter>
-							</Table>
-						</TableContainer>
-						<Box component="section" sx={{ p: 2, border: '1px dashed grey', borderRadius: 1 }}>
+						<Box component="section" sx={{ p: 1, border: '1px dashed grey', borderRadius: 1 }}>
+							<List dense={true}>
+								<ListItem>
+									<ListItemText
+											primary={
+												<Typography variant="body2" align="left" gutterBottom sx={{ fontStyle: 'italic' }}>
+													Product
+												</Typography>
+											}
+										/>
+										<ListItemText
+											primary={
+												<Typography variant="body2" align="right" gutterBottom sx={{ fontStyle: 'italic' }}>
+													Price
+												</Typography>
+											}
+										/>
+								</ListItem>
+								<Divider />
+							{selectedProducts.map((product) => (
+								<ListItem key={product.id} alignItems="flex-start">
+									<ListItemText
+										primary={product.name}
+										secondary={
+											<Typography variant="body2"gutterBottom sx={{ color: 'text.secondary', fontSize: 12, fontStyle: 'italic' }}>
+												{`${product.quantity} x Rp. ${product.price},-`}
+											</Typography>
+										}
+									/>
+									<ListItemText
+										primary={
+											<Typography variant="body2" align="right" gutterBottom sx={{ fontStyle: 'italic' }}>
+												{`Rp ${product.price * product.quantity}`}
+											</Typography>
+										}
+									/>
+								</ListItem>
+								))}
+								<Divider />
+								<ListItem>
+										<ListItemText
+											primary={
+												<Typography variant="body2" align="right" gutterBottom >
+													Total Item {selectedProducts.reduce((sum, product) => sum + product.quantity, 0)}
+												</Typography>
+											}
+											secondary={
+												<Typography variant="body2" align="right" gutterBottom>
+												Total Price {`Rp ${selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0)}`}
+											</Typography>
+											}
+										/>
+								</ListItem>
+							</List>
 							<Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 12, fontStyle: 'italic' }}>
-									Note
+									Note :
 							</Typography>
-							<Typography variant="body2">{note}</Typography>
+							<Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>{note}</Typography>
 						</Box>
 						<Box>
 							<FormControl fullWidth>
@@ -321,9 +313,9 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 				</Box>
 				<DialogActions>
 					<Button onClick={onCloseModal}>Cancel</Button>
-					<Button onClick={() => handleProceedTransaction(false)} disabled={isExistingTransaction}>Park</Button>
-					<Button type="submit" onClick={() => {handleProceedTransaction(true);
-						// connect()
+					<Button onClick={() => handleProceedTransaction(false)}>Park</Button>
+					<Button type="submit" onClick={() => {
+							handleProceedTransaction(true);
 						}}>Accept Payment</Button>
 				</DialogActions>
 			</DialogContent>

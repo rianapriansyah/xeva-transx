@@ -175,20 +175,6 @@ const ProductList: React.FC = () => {
 									<MenuItem value="beverage">Beverage</MenuItem>
 								</Select>
 							</FormControl>
-							{/* <FormControl fullWidth variant="standard">
-								<InputLabel id="category-select-label" autoFocus>Category</InputLabel>
-									<Select
-										labelId="category-select-label"
-										id="category-select-label"
-										value={newProduct.category}
-										MenuProps={MenuProps}
-										onChange={(e: { target: { value: any; }; }) => setNewProduct({ ...newProduct, category: e.target.value })}
-										>
-									{categories.map((category) => (
-										<MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
-									))}
-									</Select>
-							</FormControl> */}
 							<Autocomplete 
 								disablePortal
 								options={categories.map((cat)=>cat.name)}

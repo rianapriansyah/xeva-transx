@@ -1,6 +1,5 @@
 ﻿import React, { useEffect, useState } from 'react';
 import  * as api from '../../services/api';
-import axios from 'axios';
 import AvailableProducts from './AvailableProducts';
 import SelectedProducts from './SelectedProducts';
 import ParkedTransactionsModal from './ParkedTransactionsModal';
@@ -38,7 +37,7 @@ const TransactionMain: React.FC = () => {
 	// Fetch parked transactions
 	const fetchParkedTransactions = async () => {
 		try {
-			const response = await axios.get('http://localhost:5101/api/transactions/unpaid');
+			const response = await api.fetchParkedTransactions();
 			setParkedTransactions(response.data);
 		} catch (error) {
 			console.error('Error fetching parked transactions:', error);
