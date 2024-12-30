@@ -179,7 +179,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
         triggerSnack('Transaction successfully submitted!');
       }
 
-      //console.log('Transaction Response:', response.data);
+      console.log('Transaction Response:', response.data);
       setIsModalOpen(false);
       onClearProductsAndTransactions();
       setTableNo('');

@@ -5,11 +5,12 @@ import SelectedProducts from './SelectedProducts';
 import ParkedTransactionsModal from './ParkedTransactionsModal';
 import Grid from '@mui/material/Grid2'
 import Box from '@mui/material/Box';
-import Button from '@mui/material/Button';
+// import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
-import ReorderIcon from '@mui/icons-material/Reorder';
+import { Button } from '@mui/material';
+// import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+// import ReorderIcon from '@mui/icons-material/Reorder';
 
 interface SelectedProduct {
 	id: number;
@@ -108,19 +109,19 @@ const TransactionMain: React.FC = () => {
 		setIsModalOpen(true);
 	};
 
-const handleUpdateTransactionNote = (newNote: string) => {
-    setTransactionNote(newNote);
-};
+	// const handleUpdateTransactionNote = (newNote: string) => {
+	// 	setTransactionNote(newNote);
+	// };
 
 	return (
 		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey', borderRadius:"10px" }}>
 			<Grid container spacing={2}>
 				<Grid size={4}>
 					<Stack spacing={2}>
-						{/* <Stack spacing={2} direction="row" >
+						<Stack spacing={2} direction="row" >
 
-							<Button variant="contained" onClick={() => {onClickShowParkedTransactions()}} startIcon={<ShoppingCartIcon />} endIcon={<ReorderIcon />}></Button>
-						</Stack> */}
+							<Button variant="contained" onClick={() => {onClickShowParkedTransactions()}}></Button>
+						</Stack>
 						<SelectedProducts
 							products={selectedProducts}
 							selectedTransaction={selectedParkedTransaction} // Pass the entire transaction object
