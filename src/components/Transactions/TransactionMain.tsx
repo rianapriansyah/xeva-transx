@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import  * as api from '../../services/api';
 import AvailableProducts from './AvailableProducts';
 import SelectedProducts from './SelectedProducts';
@@ -81,16 +81,16 @@ const TransactionMain: React.FC = () => {
 			);
 		} else {
 			setSelectedProducts([...selectedProducts, { ...product, quantity: 1 }]);
-		}    
+		}
 	};
 
 	const handleUpdateQuantity = (id: number, newQuantity: number) => {
 		setSelectedProducts((prev) =>
 			prev.map((product) =>
-				product.id === id ? 
-				{ ...product, 
+				product.id === id ?
+				{ ...product,
 					productId: product.productId,
-					quantity: newQuantity 
+					quantity: newQuantity
 				} : product
 			).filter((product) => product.quantity > 0) // Remove products with zero quantity
 		);
@@ -100,7 +100,7 @@ const TransactionMain: React.FC = () => {
 	const handleCancelOrder = () => {
 		setSelectedProducts([]);
 		setSelectedParkedTransaction(null);
-		setPaymentMethods([]);
+		// setPaymentMethods([]);
 	};
 
 	const onClickShowParkedTransactions = () => {
@@ -108,17 +108,19 @@ const TransactionMain: React.FC = () => {
 		setIsModalOpen(true);
 	};
 
+const handleUpdateTransactionNote = (newNote: string) => {
+    setTransactionNote(newNote);
+};
+
 	return (
-		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey' }}>
+		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey', borderRadius:"10px" }}>
 			<Grid container spacing={2}>
-				<Grid size={6}>
+				<Grid size={4}>
 					<Stack spacing={2}>
-						<Stack spacing={2} direction="row" >
-							<Typography variant="h4" gutterBottom>
-								Create New Transaction
-							</Typography>
+						{/* <Stack spacing={2} direction="row" >
+
 							<Button variant="contained" onClick={() => {onClickShowParkedTransactions()}} startIcon={<ShoppingCartIcon />} endIcon={<ReorderIcon />}></Button>
-						</Stack>
+						</Stack> */}
 						<SelectedProducts
 							products={selectedProducts}
 							selectedTransaction={selectedParkedTransaction} // Pass the entire transaction object
@@ -129,7 +131,7 @@ const TransactionMain: React.FC = () => {
 							paymentMethods = {paymentMethods}
 						/>
 					</Stack>
-				</Grid>				
+				</Grid>
 				{/* Parked Transactions Modal */}
 				<ParkedTransactionsModal
 					isOpen={isModalOpen}
@@ -137,14 +139,14 @@ const TransactionMain: React.FC = () => {
 					onClose={() => setIsModalOpen(false)}
 					onSelectTransaction={handleSelectParkedTransaction}
 				/>
-				<Grid size={6}>
+				<Grid size={8}>
 					<Typography variant="h4" gutterBottom>
 						Available Products
 					</Typography>
 					<AvailableProducts onAddProduct={handleAddProduct} />
 				</Grid>
-			</Grid>  
-		</Box>  
+			</Grid>
+		</Box>
 	);
 };
 

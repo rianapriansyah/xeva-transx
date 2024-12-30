@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { fetchProducts } from '../../services/api';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -121,12 +121,11 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
           height: 500
          // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
         }}>
-					<ImageList cols={3} rowHeight={164}>
+					<ImageList cols={5} rowHeight={'auto'}>
 					{products.filter((product) =>
 								product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
 								product.category.toLowerCase().includes(searchQuery.toLowerCase())
 							).map((product) => (
-								
 							<ImageListItem key={product.id}>
 								<ImageButton focusRipple>
 									<ImageBackdrop className="MuiImageBackdrop-root" />

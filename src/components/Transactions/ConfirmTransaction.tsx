@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import {
     Dialog,
     DialogActions,
@@ -20,10 +20,8 @@ import {
 		ImageList,
 		ImageListItem,
 		List,
-		ListItemText,
-		ListItem,
-		Divider,
 } from '@mui/material';
+import { NumericFormat } from 'react-number-format';
 
 interface ParkedTransaction {
 	id: number;
@@ -52,37 +50,26 @@ interface ConfirmTransactionProps {
 }
 
 const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
-	note,
 	isModalOpen,
-	selectedProducts,
-	selectedTransaction,
-	tableNo,
-	guestName,
 	paymentMethods,
 	paymentMethodId,
 	onCloseModal,
-	setTableNo,
-	setGuestName,
 	handlePaymentMethodChange,
 	handleProceedTransaction,
 }) => {
 	if (!isModalOpen) return null;
 
-	const isExistingTransaction = selectedTransaction !== null;
-
-	const [cashAmount, setCashAmount] = useState<String | ''>(''); // State for cash input
+	const [cashAmount, setCashAmount] = useState(""); // State for cash input
 	const groupOfNumbers = [
 		{label:"first", numbers:["1","2","3"]},
 		{label:"second", numbers:["4","5","6"]},
 		{label:"third", numbers:["7","8","9"]},
-		{label:"last", numbers:["0", "000", "Clear"]},
+		{label:"last", numbers:["000", "0", "clear"]},
 	];
 
 	const handlePaymentChange = (event: SelectChangeEvent) => {
 			const selectedMethod = Number(event.target.value);
 			handlePaymentMethodChange(selectedMethod);
-			console.log(selectedMethod);
-			console.log(paymentMethods);
 			// Reset cash input if payment method is not "Cash"
 			if (selectedMethod !== paymentMethodId) {
 					setCashAmount('');
@@ -90,7 +77,7 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 	};
 
 	const handleNumberPadClick = (value: string) => {
-		if(value==="Clear"){
+		if(value==="clear"){
 			handleClearCash();
 			return;
 		}
@@ -111,6 +98,13 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 			setCashAmount('');
 	};
 
+	const TextFormat = styled(TextField)(() => ({
+		variant:"outlined",
+		fullWidth:true,
+		margin:"normal",
+		disabled:true
+	}));
+
 	const ImageButton = styled(ButtonBase)(({ theme }) => ({
 		position: 'relative',
 		height: 100,
@@ -118,7 +112,7 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 			width: '100% !important', // Overrides inline-style
 			height: 100,
 		},
-		'&:hover, &.Mui-focusVisible': {
+		'&.Mui-focusVisible': {
 			zIndex: 1,
 			'& .MuiImageBackdrop-root': {
 				opacity: 0.15,
@@ -157,99 +151,11 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 	}));
 
 	return (
-		<Dialog open={isModalOpen} onClose={onCloseModal}>
-			<DialogTitle>Confirm the transaction details below</DialogTitle>
+		<Dialog open={isModalOpen} onClose={onCloseModal} fullWidth={true}>
+			<DialogTitle>Select Payment Method</DialogTitle>
 			<DialogContent>
-				<Box sx={{ flexGrow: 1 }}>
+				<Box>
 					<Stack spacing={2}>
-						<Stack spacing={2} direction="row">
-								<TextField
-										autoFocus
-										required
-										margin="dense"
-										id="tableNo"
-										name="tableNo"
-										label="Enter Table No:"
-										type="text"
-										fullWidth
-										variant="standard"
-										value={selectedTransaction?.tableNo || tableNo}
-										disabled={isExistingTransaction}
-										onChange={(e) => setTableNo(e.target.value)}
-								/>
-								<TextField
-										autoFocus
-										margin="dense"
-										id="guestName"
-										name="guestName"
-										label="Enter Guest Name:"
-										type="text"
-										fullWidth
-										variant="standard"
-										value={selectedTransaction?.guestName || guestName}
-										disabled={isExistingTransaction}
-										onChange={(e) => setGuestName(e.target.value)}
-								/>
-						</Stack>
-						<Box component="section" sx={{ p: 1, border: '1px dashed grey', borderRadius: 1 }}>
-							<List dense={true}>
-								<ListItem>
-									<ListItemText
-											primary={
-												<Typography variant="body2" align="left" gutterBottom sx={{ fontStyle: 'italic' }}>
-													Product
-												</Typography>
-											}
-										/>
-										<ListItemText
-											primary={
-												<Typography variant="body2" align="right" gutterBottom sx={{ fontStyle: 'italic' }}>
-													Price
-												</Typography>
-											}
-										/>
-								</ListItem>
-								<Divider />
-							{selectedProducts.map((product) => (
-								<ListItem key={product.id} alignItems="flex-start">
-									<ListItemText
-										primary={product.name}
-										secondary={
-											<Typography variant="body2"gutterBottom sx={{ color: 'text.secondary', fontSize: 12, fontStyle: 'italic' }}>
-												{`${product.quantity} x Rp. ${product.price},-`}
-											</Typography>
-										}
-									/>
-									<ListItemText
-										primary={
-											<Typography variant="body2" align="right" gutterBottom sx={{ fontStyle: 'italic' }}>
-												{`Rp ${product.price * product.quantity}`}
-											</Typography>
-										}
-									/>
-								</ListItem>
-								))}
-								<Divider />
-								<ListItem>
-										<ListItemText
-											primary={
-												<Typography variant="body2" align="right" gutterBottom >
-													Total Item {selectedProducts.reduce((sum, product) => sum + product.quantity, 0)}
-												</Typography>
-											}
-											secondary={
-												<Typography variant="body2" align="right" gutterBottom>
-												Total Price {`Rp ${selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0)}`}
-											</Typography>
-											}
-										/>
-								</ListItem>
-							</List>
-							<Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 12, fontStyle: 'italic' }}>
-									Note :
-							</Typography>
-							<Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>{note}</Typography>
-						</Box>
 						<Box>
 							<FormControl fullWidth>
 								<InputLabel id="payment-method-label" variant="standard">Payment Method</InputLabel>
@@ -265,27 +171,31 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 								</Select>
 							</FormControl>
 						</Box>
-						{paymentMethodId === 1 && (
 						<Box>
-							<TextField
+            <Stack spacing={2}>
+            <NumericFormat value={cashAmount} displayType="input" thousandSeparator="." decimalSeparator="," prefix={'IDR '} customInput={TextField} disabled />
+            <Stack spacing={1} direction="row">
+								<Chip label="20.000" onClick={() => handleMoneyChipClick("20000")} color="success" disabled={paymentMethodId!==1} />
+								<Chip label="50.000" onClick={() => handleMoneyChipClick("50000")} color="primary" disabled={paymentMethodId!==1}/>
+								<Chip label="100.000" onClick={() => handleMoneyChipClick("100000")} color="error" disabled={paymentMethodId!==1}/>
+							</Stack>
+            </Stack>
+						
+							{/* <TextField
 									label="Cash Amount"
 									variant="outlined"
 									fullWidth
 									margin="normal"
 									value={cashAmount}
-									disabled />
-							<Stack spacing={1} direction="row">
-								<Chip label="20.000" onClick={() => handleMoneyChipClick("20000")} color="success" />
-								<Chip label="50.000" onClick={() => handleMoneyChipClick("50000")} color="primary"/>
-								<Chip label="100.000" onClick={() => handleMoneyChipClick("100000")} color="error"/>
-							</Stack>
+									disabled /> */}
+							
 							<List>
 								{groupOfNumbers.map((numbers) => (
 									<ImageList cols={3} key={numbers.label}>
 										{numbers.numbers.map((number) => (
 										<ImageListItem key={number}>
-											<ImageButton focusRipple>
-												<ImageBackdrop className="MuiImageBackdrop-root" />
+											<ImageButton focusRipple disabled={paymentMethodId!==1} >
+												<ImageBackdrop className="MuiImageBackdrop-root"  />
 												<Image onClick={() => handleNumberPadClick(number)}>
 													<Typography
 														component="span"
@@ -308,7 +218,6 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 								))}
 							</List>
 						</Box>
-						)}
 					</Stack>
 				</Box>
 				<DialogActions>

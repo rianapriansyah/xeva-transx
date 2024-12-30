@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createProduct, fetchProducts, fetchCategories, createCategory } from '../../services/api';
 import Grid from '@mui/material/Grid2'
 import Box from '@mui/material/Box';
