@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import App from './App';
 import DashboardPage from './pages';
-import OrdersPage from './pages/orders';
+// import OrdersPage from './pages/orders';
 import Layout from '../src/components/Transactions/Dashboard';
 import TransactionMain from './components/Transactions/TransactionMain';
 // import { AppProvider } from '@toolpad/core/AppProvider';
