@@ -82,6 +82,8 @@ const TransactionMain: React.FC = () => {
 		} else {
 			setSelectedProducts([...selectedProducts, { ...product, quantity: 1 }]);
 		}
+
+		console.log(existingProduct);
 	};
 
 	const handleUpdateQuantity = (id: number, newQuantity: number) => {

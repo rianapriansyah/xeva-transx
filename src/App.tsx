@@ -5,34 +5,96 @@ import ProductList from './components/Transactions/ProductList';
 import TransactionMain from './components/Transactions/TransactionMain';
 import HistoryTransactions from './components/Transactions/HistoryTransactions';
 import AppTheme from './theme/AppTheme';
+import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, styled, Toolbar } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import Typography from '@mui/material/Typography';
+import Button from '@mui/material/Button';
+import InboxIcon from '@mui/icons-material/MoveToInbox';
 
 // Placeholder components
 const Analytics = () => <div>Transaction History Management Screen</div>;
 const PaymentMethodManagement = () => <div>Payment Method Management Screen</div>;
 
+interface ListItemLinkProps {
+  icon?: React.ReactElement<unknown>;
+  primary: string;
+  to: string;
+}
+
+function ListItemLink(props: ListItemLinkProps) {
+  const { icon, primary, to } = props;
+
+  return (
+    <ListItemButton component={Link} to={to}>
+      {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+      <ListItemText primary={primary} />
+    </ListItemButton>
+  );
+}
+
 const App: React.FC = () => {
+  const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
+  const [open, setOpen] = React.useState(false);
+
+  const toggleDrawer = (newOpen: boolean) => () => {
+    setOpen(newOpen);
+  };
+
+  const menus  = [
+    {
+      title: 'Transaction',
+      element: <TransactionMain />,
+      path: '/transactions'
+    },
+    {
+      title: 'Product',
+      element: <ProductList />,
+      path: '/products'
+    }
+  ];
+  
   return (
     <AppTheme>
       <Router>
-          <h1>Coffee Shop Management App</h1>
-          {/* Navigation Buttons */}
-            <div style={{ marginBottom: '20px' }}>
-              <Link to="/products" style={{ marginRight: '10px' }}><button>Products</button></Link>
-              <Link to="/user-management" style={{ marginRight: '10px' }}><button>Users</button></Link>
-              <Link to="/transactions" style={{ marginRight: '10px' }}><button>Transactions</button></Link>
-              <Link to="/history-transactions" style={{ marginRight: '10px' }}><button>History Transactions</button></Link>
-              <Link to="/analytics" style={{ marginRight: '10px' }}><button>Analytics</button></Link>
-              <Link to="/paymentmet"><button>Settings</button></Link>
-            </div>
-          <Routes>
-            <Route path="/user-management" element={<UserManagement />} />
-            <Route path="/products" element={<ProductList />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/payment-method-management" element={<PaymentMethodManagement />} />
-            <Route path="/transactions" element={<TransactionMain />} />
-            <Route path="/history-transactions" element={<HistoryTransactions />} />
-            <Route path="/" element={<div>Welcome to the Coffee Shop Management App</div>} />
-          </Routes>
+      <AppBar position="fixed">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+            onClick={toggleDrawer(true)}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            Xeva
+          </Typography>
+          <Button>Select Store</Button>
+        </Toolbar>
+      </AppBar>
+      <Drawer open={open} onClose={toggleDrawer(false)}>
+      <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+      <List>
+        {menus.map((menu) => (
+          <ListItem key={menu.title} disablePadding>
+            <ListItemLink to={menu.path} primary={menu.title} icon={<InboxIcon />} />
+          </ListItem>
+        ))}
+      </List>
+        </Box>
+      </Drawer>
+      <Offset />
+        <Routes>
+          <Route path="/user-management" element={<UserManagement />} />
+          <Route path="/products" element={<ProductList />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/payment-method-management" element={<PaymentMethodManagement />} />
+          <Route path="/transactions" element={<TransactionMain />} />
+          <Route path="/history-transactions" element={<HistoryTransactions />} />
+          <Route path="/" element={<div>Welcome to the Coffee Shop Management App</div>} />
+        </Routes>
       </Router>
     </AppTheme>
   );

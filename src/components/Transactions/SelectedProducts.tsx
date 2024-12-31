@@ -70,13 +70,18 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   const [postMessage, setPostMessage] = useState(""); // Modal state
   
 
-  const handlePrint = async () => {
+  const handlePrint = async (fromSpeedDial:boolean) => {
+    if(fromSpeedDial&&tableNo===""&&guestName===""){
+      triggerSnack("Silakan masukkan nomor meja dan nama pemesan");
+      return;
+    }
+
     try {
         await printerService.connect();
 
         const details = {
             shopName: 'Xeva Coffee',
-            guestName: "Rian",
+            guestName: guestName,
             selectedProducts: products.map((detail:any) => ({
               name: detail.name,   // Assuming 'productName' exists in the transaction details
               quantity: detail.quantity, // Quantity of the product
@@ -84,13 +89,14 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
               total: detail.price * detail.quantity
             })),
 
+            discount:discount,
             cashierName: 'chaotic_noobz'
         };
         await printerService.printReceipt(details);
-        alert('Receipt printed successfully!');
+        triggerSnack('Receipt printed successfully!')
     } catch (error) {
         console.error('Error:', error);
-        alert('Failed to print the receipt.');
+        triggerSnack('Failed to print the receipt.');
     }
 };
 
@@ -123,11 +129,18 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
 
   const handleProceedTransaction = async (paid: boolean) => {
     debugger;
+
+    if(tableNo===""&&guestName===""){
+      triggerSnack("Silakan masukkan nomor meja dan nama pemesan");
+      return;
+    }
+
     const totalAmount = products.reduce(
       (sum, product) => sum + product.price * product.quantity,
       0
     );
     const grandTotalAmount = getGrandTotal(products);
+    const intDisc = Number(discount);
 
     const basePayload = {
       tableNo,
@@ -137,7 +150,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       totalAmount,
       paid,
       note,
-      discount,
+      intDisc,
       grandTotalAmount,
       transactionDetails: products.map((product) => ({
         transactionId:selectedTransaction?.id,
@@ -155,7 +168,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
           totalAmount,
           paid,
           note,
-          discount,
+          intDisc,
           grandTotalAmount,
           transactionDetails: products.map((product) => ({
             transactionId:selectedTransaction.id,
@@ -179,7 +192,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
         triggerSnack('Transaction successfully submitted!');
       }
 
-      //console.log('Transaction Response:', response.data);
+      console.log('Transaction Response:', response.data);
       setIsModalOpen(false);
       onClearProductsAndTransactions();
       setTableNo('');
@@ -190,7 +203,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       triggerSnack('Failed to save transaction. Please try again.');
     }
     finally{
-      handlePrint();
+      handlePrint(false);
     }
   };
 
@@ -234,7 +247,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   const handleActions = (param:string) => {
     switch(param) {
       case 'Print':
-        return 'Print';
+        return handlePrint(true);;
       case 'Note':
         return setIsModalNoteOpen(true);
       case 'Disc':

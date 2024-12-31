@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Utility function to convert a string to a DataView
  * @param value - The string to convert
  * @returns DataView representation of the string
@@ -12,10 +12,11 @@ const textToDataView = (value: string): DataView => {
  * Interface for the receipt details
  */
 interface ReceiptDetails {
-		shopName: string;
-		guestName: string;
-		selectedProducts: { name: string; quantity: number; price: number }[];
-		cashierName: string;
+	shopName: string;
+	guestName: string;
+	selectedProducts: { name: string; quantity: number; price: number }[];
+	cashierName: string;
+	discount:string;
 }
 
 /**
@@ -100,7 +101,7 @@ class PrinterService {
 				throw new Error('Printer is not connected.');
 		}
 
-		const { shopName, guestName, selectedProducts, cashierName } = details;
+		const { shopName, guestName, selectedProducts, cashierName, discount } = details;
 
 		const boldOn = new Uint8Array([27, 69, 1]);
 		const boldOff = new Uint8Array([27, 69, 0]);
@@ -140,15 +141,20 @@ class PrinterService {
 				await this.characteristic.writeValue(textToDataView(productDetailLine));
 				await this.characteristic.writeValue(new DataView(lineFeed.buffer));
 			}
+			
+			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+			await this.characteristic.writeValue(new DataView(left.buffer));
 			await this.characteristic.writeValue(textToDataView(`Qty: ${selectedProducts.reduce((sum, product) => sum + product.quantity, 0)}`));
 			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
 			await this.characteristic.writeValue(textToDataView(`Total: Rp. ${selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0)}`));
 			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+			await this.characteristic.writeValue(textToDataView(`Discount: ${discount} %`));
+			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
 			await this.characteristic.writeValue(newEmptyLine);
-			await this.characteristic.writeValue(new DataView(center.buffer));
+			await this.characteristic.writeValue(new DataView(left.buffer));
 			await this.characteristic.writeValue(textToDataView(`Cashier : ${cashierName}`));
 			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(new DataView(left.buffer));			
+			await this.characteristic.writeValue(new DataView(center.buffer));			
 			await this.characteristic.writeValue(textToDataView('---Thank you---'));
 			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
 			await this.characteristic.writeValue(newEmptyLine);
