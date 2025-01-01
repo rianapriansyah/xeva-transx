@@ -174,7 +174,7 @@ const TransactionMain: React.FC = () => {
 	return (
 		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey', borderRadius:"10px" }}>
 			<Grid container spacing={2}>
-				<Grid size={4}>
+				<Grid size={5}>
 					<Stack spacing={2}>
 						<SelectedProducts
 							products={selectedProducts}
@@ -187,7 +187,7 @@ const TransactionMain: React.FC = () => {
 						/>
 					</Stack>
 				</Grid>
-				<Grid size={8}>
+				<Grid size={7}>
 					<TransactionMainRight 
 						onAddProduct={handleAddProduct} 
 						availableProducts={availableProducts}
