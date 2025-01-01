@@ -98,12 +98,12 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 			setCashAmount('');
 	};
 
-	const TextFormat = styled(TextField)(() => ({
-		variant:"outlined",
-		fullWidth:true,
-		margin:"normal",
-		disabled:true
-	}));
+	// const TextFormat = styled(TextField)(() => ({
+	// 	variant:"outlined",
+	// 	fullWidth:true,
+	// 	margin:"normal",
+	// 	disabled:true
+	// }));
 
 	const ImageButton = styled(ButtonBase)(({ theme }) => ({
 		position: 'relative',

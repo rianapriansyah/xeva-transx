@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ConfirmTransaction from './ConfirmTransaction';
 import { createTransaction, updateTransaction } from '../../services/api';
-import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button, TextField, ToggleButtonGroup, ToggleButton, tableCellClasses, TableHead, SpeedDial, SpeedDialAction, SpeedDialIcon, Snackbar } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button, TextField, ToggleButtonGroup, ToggleButton, tableCellClasses, TableHead, SpeedDial, SpeedDialAction, Snackbar } from '@mui/material';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import Box from '@mui/material/Box';
@@ -210,7 +210,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     },
   }));
 
-  const isExistingTransaction = selectedTransaction !== null;
+  // const isExistingTransaction = selectedTransaction !== null;
 
   const isTransactionCompleted = products.length !== 0 && (tableNo!==""&& guestName!=="");
 

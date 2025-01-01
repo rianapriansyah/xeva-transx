@@ -128,7 +128,6 @@ const TransactionMain: React.FC = () => {
 			quantity: detail.quantity,
 			transactionId:transaction.id
 		})));
-		setIsModalOpen(false); // Close modal after selecting
 	};
 
 	const handleAddProduct = (product: any) => {
@@ -164,12 +163,13 @@ const TransactionMain: React.FC = () => {
 	const handleCancelOrder = () => {
 		setSelectedProducts([]);
 		setTransaction(newTransactionObj);
+		console.log(transactions);
 		// setPaymentMethods([]);
 	};
 
-const handleUpdateTransactionNote = (newNote: string) => {
-    setTransactionNote(newNote);
-};
+// const handleUpdateTransactionNote = (newNote: string) => {
+//     setTransactionNote(newNote);
+// };
 
 	return (
 		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey', borderRadius:"10px" }}>
