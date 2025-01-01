@@ -9,7 +9,7 @@ const HistoryTransaction: React.FC = () => {
     const fetchTransactions = async () => {
       setLoading(true);
       try {
-        const response = await fetchTransaction();
+        const response = await fetchTransaction(1);
         setTransactions(response.data); // Assuming the API returns an array of transactions
       } catch (error) {
         console.error('Error fetching transactions:', error);
