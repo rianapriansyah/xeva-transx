@@ -6,7 +6,7 @@ import TextField from '@mui/material/TextField';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import InputLabel from '@mui/material/InputLabel';
-import { Button, MenuItem } from '@mui/material';
+import { Button, MenuItem, Paper, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import ButtonBase from '@mui/material/ButtonBase';
 import Typography from '@mui/material/Typography';
 import Stack from '@mui/material/Stack';
@@ -15,28 +15,21 @@ import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
 import { ImageListItemBar } from '@mui/material';
 import Autocomplete from '@mui/material/Autocomplete';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditIcon from '@mui/icons-material/Edit';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../services/store';
 
-// import ListSubheader from '@mui/material/ListSubheader';
-// import List from '@mui/material/List';
-// import ListItemButton from '@mui/material/ListItemButton';
-// import ListItemIcon from '@mui/material/ListItemIcon';
-// import ListItemText from '@mui/material/ListItemText';
-// import Collapse from '@mui/material/Collapse';
-// import InboxIcon from '@mui/icons-material/MoveToInbox';
-// import DraftsIcon from '@mui/icons-material/Drafts';
-// import SendIcon from '@mui/icons-material/Send';
-// import ExpandLess from '@mui/icons-material/ExpandLess';
-// import ExpandMore from '@mui/icons-material/ExpandMore';
-// import StarBorder from '@mui/icons-material/StarBorder';
+
 
 const ProductList: React.FC = () => {
+	const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
 	const [products, setProducts] = useState<any[]>([]);
 	const [categories, setCategories] = useState<any[]>([]);
 	const [newProduct, setNewProduct] = useState({ name: '', price: '', victual:'', category:''});
 	const [newCategory, setNewCategory] = useState({ name: '', description: '', open:false});
 	const [loading, setLoading] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
-	// const [open, setOpen] = React.useState(true);
 
 	useEffect(() => {
 		const loadProducts = async () => {
@@ -50,7 +43,7 @@ const ProductList: React.FC = () => {
 
 	const handleFetchProduct = async () => {
 		try {
-			const data = await fetchProducts();
+			const data = await fetchProducts(selectedStore?.id);
 			setProducts(data.data);
 		} catch (error) {
 			console.error('Error fetching products:', error);
@@ -127,7 +120,7 @@ const ProductList: React.FC = () => {
 		justifyContent: 'center',
 		color: theme.palette.common.white,
 	}));
-	
+
 	const ImageBackdrop = styled('span')(({ theme }) => ({
 		position: 'absolute',
 		left: 0,
@@ -138,7 +131,7 @@ const ProductList: React.FC = () => {
 		opacity: 0.4,
 		transition: theme.transitions.create('opacity'),
 	}));
-	
+
 	const ImageMarked = styled('span')(({ theme }) => ({
 		height: 3,
 		width: 18,
@@ -148,6 +141,26 @@ const ProductList: React.FC = () => {
 		left: 'calc(50% - 9px)',
 		transition: theme.transitions.create('opacity'),
 	}));
+
+	const StyledTableRow = styled(TableRow)(({ theme }) => ({
+    '&:nth-of-type(odd)': {
+      backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+      border: 0,
+    },
+  }));
+
+  const StyledTableCell = styled(TableCell)(({ theme }) => ({
+    [`&.${tableCellClasses.head}`]: {
+      backgroundColor: theme.palette.common.black,
+      color: theme.palette.common.white,
+    },
+    [`&.${tableCellClasses.body}`]: {
+      fontSize: 14,
+    },
+  }));
 
 	return (
 		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey', borderRadius:"10px" }}>
@@ -163,7 +176,7 @@ const ProductList: React.FC = () => {
 						</Typography>
 						<Stack spacing={2} direction="row">
 							<FormControl fullWidth variant="standard" >
-							<InputLabel id="victuals-select-label" autoFocus>Victual</InputLabel>
+							<InputLabel id="victuals-select-label" autoFocus>Kitchen</InputLabel>
 								<Select
 									required
 									labelId="victuals-select-label"
@@ -175,7 +188,7 @@ const ProductList: React.FC = () => {
 									<MenuItem value="beverage">Beverage</MenuItem>
 								</Select>
 							</FormControl>
-							<Autocomplete 
+							<Autocomplete
 								disablePortal
 								options={categories.map((cat)=>cat.name)}
 								sx={{ width: 500 }}
@@ -184,7 +197,7 @@ const ProductList: React.FC = () => {
 								}}
 								renderInput={(newProduct) => <TextField {...newProduct} label="Category" variant="standard" required
 								/>}
-								
+
 							/>
 						</Stack>
 						<Stack spacing={2} direction="row">
@@ -261,7 +274,7 @@ const ProductList: React.FC = () => {
 						<Stack spacing={3}>
 							<Button onClick={handleAddCategory} variant="contained">Add New Category</Button>
 						</Stack>
-					</Stack>
+				</Stack>
 				</Grid>
 				<Grid size={6}>
 					<Stack spacing={2}>
@@ -299,13 +312,59 @@ const ProductList: React.FC = () => {
 										</ImageButton>
 									</ImageListItem>
 								))}
-							</ImageList>	
-						</Box>	
+							</ImageList>
+						</Box>
 					</Stack>
 				</Grid>
 				<Grid size={6}>
+				<Box sx={{
+            mb: 2,
+            display: "flex",
+            flexDirection: "column",
+            height: "inherit"
+          // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
+          }}>
+          <TableContainer component={Paper}>
+            <Table size='small'>
+              <TableHead>
+                <TableRow>
+                  <StyledTableCell>Nama Kategori</StyledTableCell>
+                  <StyledTableCell align="left">Deskripsi</StyledTableCell>
+                  <StyledTableCell align="right">Aksi</StyledTableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+              {categories.map((category) => (
+                <StyledTableRow  key={category.id}>
+                  <StyledTableCell align="left">
+                    {category.name}
+                  </StyledTableCell>
+									<StyledTableCell align="left">
+                    {category.description}
+                  </StyledTableCell>
+                  <StyledTableCell align="right">
+                    <ToggleButtonGroup
+                    color="primary"
+                      size='small'
+                      exclusive
+                      aria-label="action button"
+                    >
+                      <ToggleButton value="down" onClick={() => alert(category.name)}>
+                        <EditIcon />
+                      </ToggleButton>                      
+                      <ToggleButton value="delete" onClick={() => alert(category.name)}>
+                        <DeleteOutlineIcon />
+                      </ToggleButton>
+                    </ToggleButtonGroup>
+                  </StyledTableCell>
+                </StyledTableRow >
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
 				</Grid>
-      </Grid>			
+			</Grid>
 		</Box>
 	);
 };

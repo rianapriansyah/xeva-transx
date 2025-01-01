@@ -75,7 +75,6 @@ const DiscountModal: React.FC<DiscountProps> = ({
 	];
 
 	const handleNumberPadClick = (value: string) => {
-		debugger;
 		if(value==="*" || value==="00"){
 			//handleClearCash();
 			return;

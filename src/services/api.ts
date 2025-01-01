@@ -1,9 +1,9 @@
 ﻿import axios from 'axios';
-
- const API_BASE_URL = 'http://localhost:5101/api';
+ 
+const API_BASE_URL = 'http://localhost:5101/api';
 // const API_BASE_URL = 'https://srv664937.hstgr.cloud/api';
 
-export const fetchProducts = () => axios.get(`${API_BASE_URL}/products`);
+export const fetchProducts = (storeId:any) => axios.get(`${API_BASE_URL}/products/store/${storeId}`);
 export const createProduct = (productsData: any) =>
   axios.post(`${API_BASE_URL}/products`, productsData);
 
@@ -21,6 +21,6 @@ export const updateTransaction = (transactionId: any, transactionData:any) =>
     transactionData
   );
 
-export const fetchTransaction = () => axios.get(`${API_BASE_URL}/transactions`);
+export const fetchTransaction = (storeId:any) => axios.get(`${API_BASE_URL}/transactions/store/${storeId}`);
 
 export const fetchParkedTransactions = () => axios.get(`${API_BASE_URL}/transactions/unpaid`);

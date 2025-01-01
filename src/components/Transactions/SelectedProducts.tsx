@@ -18,30 +18,14 @@ import NoteModal from './NoteModal';
 import SaveIcon from '@mui/icons-material/Save';
 import DiscountModal from './DiscountModal';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
-
-interface ParkedTransaction {
-  id: number;
-  tableNo:string
-  guestName:string
-  paid: boolean;
-  totalAmount: number;
-  paymentMethodId: number;
-  transactionDetails: SelectedProduct[];
-}
-
-interface SelectedProduct {
-  id: number;
-  transactionId:number;
-  productId:number;
-  name:string;
-  price:number;
-  quantity:number;
-  total:number
-}
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import { Transaction, SelectedProduct } from '../../types/interfaceModel';
+import AppsIcon from '@mui/icons-material/Apps';
+import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
 
 interface SelectedProductsProps {
   products: SelectedProduct[];
-  selectedTransaction:ParkedTransaction;
+  selectedTransaction:Transaction;
   onUpdateQuantity: (id: number, newQuantity: number) => void;
   onCancelOrder: () => void;
   onUpdateTransactionNote: (note: string) => void; // Add a handler for transaction note
@@ -63,12 +47,11 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const [isNoteModalOpen, setIsModalNoteOpen] = useState(false); // Modal state
   const [isDiscModalOpen, setIsDiscModalOpen] = useState(false); // Modal state
-  const [tableNo, setTableNo] = useState(selectedTransaction?.tableNo || ""); // Default from transaction
-  const [guestName, setGuestName] = useState(selectedTransaction?.guestName || ""); // Default from transaction
-  const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction?.paymentMethodId || 1); // Selected payment method
-  const [discount, setDiscount] = useState(""); // Modal state
-  const [postMessage, setPostMessage] = useState(""); // Modal state
-  
+  const [tableNo, setTableNo] = useState(selectedTransaction.tableNo); // Default from transaction
+  const [guestName, setGuestName] = useState(selectedTransaction.guestName); // Default from transaction
+  const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction.paymentMethodId); // Selected payment method
+  const [discount, setDiscount] = useState("0"); // Modal state
+  const [postMessage, setPostMessage] = useState(""); // Modal state  
 
   const handlePrint = async (fromSpeedDial:boolean) => {
     if(fromSpeedDial&&tableNo===""&&guestName===""){
@@ -105,7 +88,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     setGuestName("");
     setTableNo("");
     onUpdateTransactionNote("")
-    setDiscount("");
+    setDiscount("0");
   };
 
   const getGrandTotal = (products:any) => {
@@ -128,8 +111,8 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   };
 
   const handleProceedTransaction = async (paid: boolean) => {
-    debugger;
-
+    setTableNo(selectedTransaction?.tableNo);
+    setGuestName(selectedTransaction?.guestName);
     if(tableNo===""&&guestName===""){
       triggerSnack("Silakan masukkan nomor meja dan nama pemesan");
       return;
@@ -265,6 +248,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     setOpenSnack(true);
   };
 
+  // const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
 
   return (
     <Box>
@@ -283,7 +267,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             type="text"
             variant="standard"
             value={selectedTransaction?.tableNo || tableNo}
-            disabled={isExistingTransaction}
+            disabled={selectedTransaction?.tableNo!==""}
             onChange={(e) => setTableNo(e.target.value)}
           />
           <TextField
@@ -294,11 +278,20 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             label="Guest Name:"
             type="text"
             variant="standard"
-            value={guestName}
-            disabled={isExistingTransaction}
+            value={selectedTransaction?.guestName || guestName}
+            disabled={selectedTransaction?.guestName!==""}
             onChange={(e) => setGuestName(e.target.value)}
           />
         </Stack>
+        <Box>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Disc : {discount} %
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Total Items :{' '}
+              {products.reduce((sum, product) => sum + product.quantity, 0)}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Note : {note}</Typography>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Cashier : chaotic_noobz</Typography>
+          </Box>
         <Box sx={{
             mb: 2,
             display: "flex",
@@ -319,23 +312,29 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
               <TableBody>
               {products.map((product) => (
                 <StyledTableRow  key={product.id}>
-                  <StyledTableCell>{product.name}</StyledTableCell>
+                  <StyledTableCell>
+                    {product.name}
+                  <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>food</Typography>
+                  </StyledTableCell>
                   <StyledTableCell align="right">{product.quantity} x 
                     <NumericFormat value={product.price} displayType="text" thousandSeparator="." decimalSeparator="," prefix={' '}/>
                   </StyledTableCell>
                   <StyledTableCell align="right"><NumericFormat value={getTotalPerProduct(product.price, product.quantity)} displayType="text" thousandSeparator="." decimalSeparator="," prefix={'IDR '}/></StyledTableCell>
                   <StyledTableCell align="center">
                     <ToggleButtonGroup
+                    color="primary"
                       size='small'
                       exclusive
-                      //onChange={handleAlignment}
-                      aria-label="text alignment"
+                      aria-label="action button"
                     >
-                      <ToggleButton value="left" aria-label="left aligned" onClick={() => onUpdateQuantity(product.id, product.quantity - 1)}>
-                        <ArrowCircleDownIcon />
+                      <ToggleButton value="up" onClick={() => onUpdateQuantity(product.id, product.quantity + 1)}>
+                        <ArrowCircleUpIcon />
                       </ToggleButton>
-                      <ToggleButton value="center" aria-label="centered" onClick={() => onUpdateQuantity(product.id, product.quantity + 1)}>
-                      <ArrowCircleUpIcon />
+                      <ToggleButton value="down" onClick={() => onUpdateQuantity(product.id, product.quantity - 1)}>
+                        <ArrowCircleDownIcon />
+                      </ToggleButton>                      
+                      <ToggleButton value="delete" onClick={() => onUpdateQuantity(product.id, product.quantity = 0)}>
+                        <DeleteOutlineIcon />
                       </ToggleButton>
                     </ToggleButtonGroup>
                   </StyledTableCell>
@@ -345,18 +344,12 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             </Table>
           </TableContainer>
         </Box>
-        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Disc % : {discount}
-          </Typography>
-        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Total Items :{' '}
-          {products.reduce((sum, product) => sum + product.quantity, 0)}
-        </Typography>
-        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Note : {note}</Typography>
-        <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Cashier : chaotic_noobz</Typography>
+        
         <Stack direction="row" spacing={2} >
           <SpeedDial
-            sx={{position:"right"}}
-            ariaLabel="SpeedDial tooltip example"
-            icon={<SpeedDialIcon  />}
+            ariaLabel="SpeedDial tooltip action"
+            icon={<AppsIcon />}
+            openIcon={<AppRegistrationIcon />}
             onClose={handleClose}
             onOpen={handleOpen}
             open={open}
@@ -372,56 +365,6 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
               />
             ))}
           </SpeedDial>
-          {/* <Button
-            variant="outlined"
-            color="primary"
-            disabled={!isTransactionCompleted}
-            onClick={() => {onClearProductsAndTransactions();}}
-            startIcon={<PrintIcon />}
-            sx={{textTransform:'none'}}
-            >
-            Print
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            disabled={products.length === 0}
-            onClick={() => {setIsModalNoteOpen(true);}}
-            startIcon={<EditNoteIcon />}
-            sx={{textTransform:'none'}}
-            >
-            Note
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            disabled={products.length === 0}
-            onClick={() => {setIsDiscModalOpen(true);}}
-            startIcon={<PercentIcon />}
-            sx={{textTransform:'none'}}
-            >
-            Disc
-          </Button>
-          <Button
-            variant="outlined"
-            color="primary"
-            disabled={!isTransactionCompleted}
-            onClick={() => {handleProceedTransaction(false);}}
-            startIcon={<SaveIcon />}
-            sx={{textTransform:'none'}}
-            >
-            Save
-          </Button>
-          <Button
-            variant="contained"
-            color="error"
-            disabled={products.length === 0}
-            onClick={() => {onClearProductsAndTransactions();}}
-            startIcon={<ClearAllIcon />}
-            sx={{textTransform:'none'}}
-            >
-            Cancel
-          </Button> */}
         </Stack>
         <Button
           size='large'

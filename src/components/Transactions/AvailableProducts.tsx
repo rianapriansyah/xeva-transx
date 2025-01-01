@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from 'react';
-import { fetchProducts } from '../../services/api';
+import React, {  useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -8,45 +7,42 @@ import Stack from '@mui/material/Stack';
 import { styled } from '@mui/material/styles';
 import ImageList from '@mui/material/ImageList';
 import ImageListItem from '@mui/material/ImageListItem';
-import { ImageListItemBar } from '@mui/material';
+import { ImageListItemBar, Menu, MenuItem, MenuList } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Grid from '@mui/material/Grid2'
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+// import Menu from '../common/Menu';
 
+interface AvailableProduct {
+  id: number;
+  transactionId:number;
+  productId:number;
+  name:string;
+  price:number;
+  quantity:number;
+  total:number;
+  kitchen:string;
+  category:string;
+}
+
+interface Category {
+  id: number;
+  name:string;
+}
 
 interface AvailableProductsProps {
+	availableProducts:AvailableProduct[];
+	categories:Category[];
 	onAddProduct: (product: any) => void;
 }
 
-const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) => {
-	const [products, setProducts] = useState<any[]>([]);
-	const [loading, setLoading] = useState(false);
+const AvailableProducts: React.FC<AvailableProductsProps> = ({
+	availableProducts,
+	categories,
+	onAddProduct
+}) => {
+
 	const [searchQuery, setSearchQuery] = useState('');
-
-	useEffect(() => {
-		const newProduct = {
-			name: 'Add New Product',
-			id:99999,
-			category:""
-		};
-
-		const loadProducts = async () => {
-			setLoading(true);
-			try {
-				const data = await fetchProducts();
-				setProducts(data.data);
-				setProducts((products) => [...products, newProduct]);
-			} catch (error) {
-				console.error('Error fetching products:', error);
-			} finally {
-				setLoading(false);
-			}
-		};
-		loadProducts();
-	}, []);
-
-	if (loading) return <p>Loading...</p>;	
-
 	const ImageButton = styled(ButtonBase)(({ theme }) => ({
 		position: 'relative',
 		height: 200,
@@ -67,7 +63,7 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 			},
 		},
 	}));
-	
+
 	const Image = styled('span')(({ theme }) => ({
 		position: 'absolute',
 		left: 0,
@@ -79,7 +75,7 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 		justifyContent: 'center',
 		color: theme.palette.common.white,
 	}));
-	
+
 	const ImageBackdrop = styled('span')(({ theme }) => ({
 		position: 'absolute',
 		left: 0,
@@ -90,7 +86,7 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 		opacity: 0.4,
 		transition: theme.transitions.create('opacity'),
 	}));
-	
+
 	const ImageMarked = styled('span')(({ theme }) => ({
 		height: 3,
 		width: 18,
@@ -101,17 +97,64 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 		transition: theme.transitions.create('opacity'),
 	}));
 
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+	const filterFromCategory = (category: Category) => {
+		handleClose();
+
+		if(category.id===999){
+			setSearchQuery("");
+		}
+		else{
+			setSearchQuery(category.name);
+		}
+	};
+
 	return (
-		<Box>
+		<React.Fragment>
+			<Typography variant="h5" gutterBottom>
+				Produk Tersedia
+			</Typography>
+			<Menu
+				id="basic-menu"
+				anchorEl={anchorEl}
+				open={open}
+				onClose={handleClose}
+				MenuListProps={{
+					'aria-labelledby': 'basic-button',
+				}}
+				slotProps={{
+          paper: {
+            style: {
+              maxHeight: 48 * 5,
+              width: '20ch',
+            },
+          },
+        }}
+			>
+				{categories.map((category)=>(
+					<MenuList key={category.id}>
+						<MenuItem onClick={()=>filterFromCategory(category)}>{category.name}</MenuItem>
+					</MenuList >
+				))}
+			</Menu>
 			<Stack spacing={2}>
 				<Stack spacing={2} direction="row">
 					<Grid size={10}>
 					<TextField id="outlined-basic" label="Search products..." variant="outlined" fullWidth onChange={(e) => setSearchQuery(e.target.value)}/>
 					</Grid>
 					<Grid size={2}>
-					<IconButton aria-label="delete" size="large">
+					<IconButton aria-label="delete" size="large" onClick={handleClick}>
 						<FilterAltIcon fontSize="inherit" />
 					</IconButton>
+
 					</Grid>
 				</Stack>
 				<Box sx={{
@@ -122,8 +165,8 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
          // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
         }}>
 					<ImageList cols={5} rowHeight={'auto'}>
-					{products.filter((product) =>
-								product.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+					{availableProducts.filter((product) =>
+								product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 								product.category.toLowerCase().includes(searchQuery.toLowerCase())
 							).map((product) => (
 							<ImageListItem key={product.id}>
@@ -149,10 +192,10 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({ onAddProduct }) =
 								</ImageButton>
 							</ImageListItem>
 						))}
-					</ImageList>	
-				</Box>			
+					</ImageList>
+				</Box>
 			</Stack>
-		</Box>
+		</React.Fragment>
 	);
 };
 
