@@ -1,9 +1,11 @@
 ﻿import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import storeReducer from './storeSlice';
+import userReducer from './userSlice'; // Import the user slice
 
 // Combine reducers (if you have multiple reducers, add them here)
 const rootReducer = combineReducers({
     store: storeReducer, // Key must match the slice name
+    user: userReducer,   // User-specific reducer for roles
 });
 
 // Utility function to save state to localStorage

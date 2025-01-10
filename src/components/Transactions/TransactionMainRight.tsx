@@ -4,11 +4,13 @@ import { Tab, Tabs } from '@mui/material';
 import AvailableProducts from './AvailableProducts';
 import UnpaidTransactions from './UnpaidTransactions';
 import { Transaction, Product, Category } from '../../types/interfaceModel';
+import PaidTransactions from './PaidTransactions';
 
 interface TransactionMainRightProps {
   availableProducts:Product[];
   categories:Category[];
 	transactions:Transaction[];
+	unpaidTransactions:Transaction[];
 	onAddProduct: (product: any) => void;
 	onSelectTransaction: (transaction: Transaction) => void;
 }
@@ -17,6 +19,7 @@ const TransactionMainRight: React.FC<TransactionMainRightProps> = ({
   availableProducts,
   categories,
 	transactions,
+	unpaidTransactions,
   onAddProduct,
 	onSelectTransaction
 }) => {
@@ -51,10 +54,10 @@ const TransactionMainRight: React.FC<TransactionMainRightProps> = ({
 	return (
 		<React.Fragment>
 			<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-				<Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+				<Tabs value={value} onChange={handleChange} aria-label="basic tabs example" variant="scrollable">
 					<Tab label="Product Tersedia" />
 					<Tab label="Transaksi Belum Terbayar" />
-					<Tab label="Semua Transaksi Hari Ini" />
+					<Tab label="Transaksi Hari Ini" />
 				</Tabs>
 			</Box>
 			<CustomTabPanel value={value} index={0}>
@@ -66,12 +69,15 @@ const TransactionMainRight: React.FC<TransactionMainRightProps> = ({
 			</CustomTabPanel>
 			<CustomTabPanel value={value} index={1}>
 				<UnpaidTransactions
-					unpaidTransactions={transactions}
+					unpaidTransactions={unpaidTransactions}
 					onSelectTransaction={onSelectTransaction}
 				/>
 			</CustomTabPanel>
 			<CustomTabPanel value={value} index={2}>
-				Transaksi Hari Ini
+				<PaidTransactions
+					paidTransactions={transactions}
+					onSelectTransaction={onSelectTransaction}
+				/>
 			</CustomTabPanel>
 		</React.Fragment>
 	);

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ConfirmTransaction from './ConfirmTransaction';
 import { createTransaction, updateTransaction } from '../../services/api';
-import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button, TextField, ToggleButtonGroup, ToggleButton, tableCellClasses, TableHead, SpeedDial, SpeedDialAction, Snackbar } from '@mui/material';
+import { Table, TableBody, TableCell, TableContainer, TableRow, Paper, Button, TextField, ToggleButtonGroup, ToggleButton, tableCellClasses, TableHead, SpeedDial, SpeedDialAction, Snackbar, Grid2 as Grid } from '@mui/material';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import Box from '@mui/material/Box';
@@ -19,18 +19,21 @@ import SaveIcon from '@mui/icons-material/Save';
 import DiscountModal from './DiscountModal';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import { Transaction, SelectedProduct } from '../../types/interfaceModel';
+import { Transaction, TransactionDetailProduct } from '../../types/interfaceModel';
 import AppsIcon from '@mui/icons-material/Apps';
 import AppRegistrationIcon from '@mui/icons-material/AppRegistration';
+import { getGrandTotal } from '../../services/transactionService';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../services/store';
+
 
 interface SelectedProductsProps {
-  products: SelectedProduct[];
+  products: TransactionDetailProduct[];
   selectedTransaction:Transaction;
   onUpdateQuantity: (id: number, newQuantity: number) => void;
   onCancelOrder: () => void;
-  onUpdateTransactionNote: (note: string) => void; // Add a handler for transaction note
-  note: string; // The transaction note state
   paymentMethods:any
+  refreshTransactions: () => void; 
 }
 
 const SelectedProducts: React.FC<SelectedProductsProps> = ({
@@ -38,20 +41,24 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   selectedTransaction,
   onUpdateQuantity,
   onCancelOrder,
-  onUpdateTransactionNote,
   paymentMethods,
-  note
+  refreshTransactions
 }) => {
-
+  const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
   const printerService = new PrinterService();
   const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
-  const [isNoteModalOpen, setIsModalNoteOpen] = useState(false); // Modal state
-  const [isDiscModalOpen, setIsDiscModalOpen] = useState(false); // Modal state
+  const [isNoteModalOpen, setNoteModalState] = useState(false); // Modal state
+  const [isDiscModalOpen, setDiscountModalState] = useState(false); // Modal state
   const [tableNo, setTableNo] = useState(selectedTransaction.tableNo); // Default from transaction
   const [guestName, setGuestName] = useState(selectedTransaction.guestName); // Default from transaction
   const [paymentMethodId, setPaymentMethod] = useState(selectedTransaction.paymentMethodId); // Selected payment method
-  const [discount, setDiscount] = useState("0"); // Modal state
-  const [postMessage, setPostMessage] = useState(""); // Modal state  
+  const [disc, setDiscount] = useState(""); // Modal state
+  const [postMessage, setPostMessage] = useState(""); // Modal state
+  const [note, setTransactionNote] = useState("");
+  const [open, setOpen] = React.useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const handleCloseSnack = () => setOpenSnack(false);
 
   const handlePrint = async (fromSpeedDial:boolean) => {
     if(fromSpeedDial&&tableNo===""&&guestName===""){
@@ -60,26 +67,28 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     }
 
     try {
-        await printerService.connect();
+      triggerSnack("Mencetak");
+      await printerService.connect();
 
-        const details = {
-            shopName: 'Xeva Coffee',
-            guestName: guestName,
-            selectedProducts: products.map((detail:any) => ({
-              name: detail.name,   // Assuming 'productName' exists in the transaction details
-              quantity: detail.quantity, // Quantity of the product
-              price: detail.price, // Price of the product
-              total: detail.price * detail.quantity
-            })),
+      const details = {
+          shopName: 'Xeva Coffee',
+          guestName: guestName,
+          selectedProducts: products.map((detail:any) => ({
+            name: detail.name,   // Assuming 'productName' exists in the transaction details
+            quantity: detail.quantity, // Quantity of the product
+            price: detail.price, // Price of the product
+            total: detail.price * detail.quantity
+          })),
 
-            discount:discount,
-            cashierName: 'chaotic_noobz'
-        };
-        await printerService.printReceipt(details);
-        triggerSnack('Receipt printed successfully!')
+          discount:disc,
+          cashierName: 'chaotic_noobz'
+      };
+      await printerService.printReceipt(details);
+      triggerSnack('Receipt printed successfully!')
     } catch (error) {
-        console.error('Error:', error);
-        triggerSnack('Failed to print the receipt.');
+      console.error('Error:', error);
+      alert(error);
+      triggerSnack('Failed to print the receipt.');
     }
 };
 
@@ -87,18 +96,26 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     onCancelOrder();
     setGuestName("");
     setTableNo("");
-    onUpdateTransactionNote("")
-    setDiscount("0");
+    setTransactionNote("");
+    setDiscount("");
+    setPaymentMethod(1);
   };
 
-  const getGrandTotal = (products:any) => {
+  const handleUpdateTransactionNote = (newNote: string) => {
+    setTransactionNote(newNote);
+    setNoteModalState(false);
+  };
+
+  const handleUpdateTransactionDiscount = (newDiscount: string) => {
+    setDiscount(newDiscount);
+    setDiscountModalState(false);
+  };
+
+  const getDiscount = (products:any) => {
     const totalAmount = products.reduce((sum: number, product: { price: number; quantity: number; }) => sum + product.price * product.quantity, 0).toFixed(2);
-
-    const intDisc = Number(discount);
+    const intDisc = Number(disc);
     const discountPrice = (intDisc * totalAmount)/100
-    const grandTotalAmount = totalAmount - discountPrice
-
-    return grandTotalAmount;
+    return discountPrice;
   };
 
   const getTotalPerProduct = (price:number, qty:number) => {
@@ -111,10 +128,13 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   };
 
   const handleProceedTransaction = async (paid: boolean) => {
-    setTableNo(selectedTransaction?.tableNo);
-    setGuestName(selectedTransaction?.guestName);
-    if(tableNo===""&&guestName===""){
-      triggerSnack("Silakan masukkan nomor meja dan nama pemesan");
+    if(selectedTransaction.id===0 && (tableNo===""||guestName==="")){
+      triggerSnack("Silakan lengkapi nomor meja dan nama pemesan");
+      return;
+    }
+
+    if(!paid && selectedTransaction.paid){
+      triggerSnack("Silakan tekan tombol hijau untuk melakukan perubahan transaksi yang sudah terbayar");
       return;
     }
 
@@ -122,10 +142,12 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       (sum, product) => sum + product.price * product.quantity,
       0
     );
-    const grandTotalAmount = getGrandTotal(products);
-    const intDisc = Number(discount);
+    const grandTotalAmount = getGrandTotal(products, disc);
+    const discount = Number(disc);
+    const storeId = selectedStore?.id;
 
     const basePayload = {
+      storeId,
       tableNo,
       guestName,
       userId: 1,
@@ -133,7 +155,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       totalAmount,
       paid,
       note,
-      intDisc,
+      discount,
       grandTotalAmount,
       transactionDetails: products.map((product) => ({
         transactionId:selectedTransaction?.id,
@@ -144,14 +166,14 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       })),
     };
 
-    const transactionPayload = selectedTransaction
+    const transactionPayload = selectedTransaction.id
       ? {
           ...selectedTransaction, // Keep existing fields from the selected transaction
           paymentMethodId: 1, // Overwrite only these fields
           totalAmount,
           paid,
           note,
-          intDisc,
+          discount,
           grandTotalAmount,
           transactionDetails: products.map((product) => ({
             transactionId:selectedTransaction.id,
@@ -168,25 +190,23 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       if (selectedTransaction?.id) {
         // Update existing transaction
         response = await updateTransaction(selectedTransaction.id, transactionPayload);
-        triggerSnack('Transaction successfully updated!');
+        triggerSnack('Transaksi Berhasil Diubah!');
       } else {
         // Create new transaction
         response = await createTransaction(transactionPayload);
-        triggerSnack('Transaction successfully submitted!');
+        triggerSnack('Transaksi Berhasil Dibuat!');
       }
 
-      console.log('Transaction Response:', response.data);
+      console.log('Transaction Response:', response);
       setIsModalOpen(false);
       onClearProductsAndTransactions();
-      setTableNo('');
-      setGuestName('');
-      setPaymentMethod(1);
+      refreshTransactions();
     } catch (error) {
       console.error('Error saving transaction:', error);
       triggerSnack('Failed to save transaction. Please try again.');
     }
     finally{
-      handlePrint(false);
+      //handlePrint(false);
     }
   };
 
@@ -210,14 +230,11 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     },
   }));
 
-  // const isExistingTransaction = selectedTransaction !== null;
+  //  const isExistingTransaction = selectedTransaction.id !== null;
 
-  const isTransactionCompleted = products.length !== 0 && (tableNo!==""&& guestName!=="");
+  // const isTransactionCompleted = products.length !== 0 && (tableNo!=""&& guestName!="");
 
-  const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-  const handleCloseSnack = () => setOpenSnack(false);
+  
 
   const actions = [
     { icon: <PrintIcon />, name: 'Print', action:"Print" },
@@ -228,13 +245,14 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   ];
 
   const handleActions = (param:string) => {
+    handleClose();
     switch(param) {
       case 'Print':
         return handlePrint(true);;
       case 'Note':
-        return setIsModalNoteOpen(true);
+        return setNoteModalState(true);
       case 'Disc':
-        return setIsDiscModalOpen(true);;
+        return setDiscountModalState(true);;
       case 'Save':
         return handleProceedTransaction(false);;
       case 'Cancel':
@@ -248,17 +266,21 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
     setOpenSnack(true);
   };
 
-  // const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
+  const proceedTransaction = () => {
+    if(selectedTransaction.id===0 && (tableNo===""&&guestName==="")){
+      triggerSnack("Silakan masukkan nomor meja dan nama pemesan, dan pilih produk yang akan di pesan!");
+      return;
+    }
+
+    setIsModalOpen(true);
+  };
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Pesanan Baru
-      </Typography>
+        <Button variant="contained" onClick={()=>onClearProductsAndTransactions()}>Pesanan Baru</Button>
       <Stack spacing={2}>
         <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: 'wrap' }}>
           <TextField
-            autoFocus
             required
             margin="dense"
             id="tableNo"
@@ -271,7 +293,6 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             onChange={(e) => setTableNo(e.target.value)}
           />
           <TextField
-            autoFocus
             margin="dense"
             id="guestName"
             name="guestName"
@@ -284,14 +305,28 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
           />
         </Stack>
         <Box>
-            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Disc : {discount} %
-            </Typography>
+        <Grid container rowSpacing={1}>
+          <Grid size={6}>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Note : {note}</Typography>
             <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Total Items :{' '}
               {products.reduce((sum, product) => sum + product.quantity, 0)}
             </Typography>
-            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Note : {note}</Typography>
-            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Cashier : chaotic_noobz</Typography>
-          </Box>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Disc : {disc} % =
+            <NumericFormat value={getDiscount(products)} displayType="text" thousandSeparator="." decimalSeparator="," prefix={' IDR '}/>
+            </Typography>            
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Total :
+              <NumericFormat value={products.reduce((sum: number, product: { price: number; quantity: number; }) => sum + product.price * product.quantity, 0)} 
+              displayType="text" thousandSeparator="." decimalSeparator="," prefix={' IDR '}/>
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic' }}>Gr. Total :
+              <NumericFormat value={getGrandTotal(products, disc)} displayType="text" thousandSeparator="." decimalSeparator="," prefix={' IDR '}/>
+            </Typography>
+          </Grid>
+          <Grid size={6}>
+            <Typography variant="body2" sx={{ color: 'text.primary', fontSize: 12, fontStyle: 'italic', textAlign:'right' }}>Cashier : chaotic_noobz</Typography>
+            </Grid>
+        </Grid>
+        </Box>
         <Box sx={{
             mb: 2,
             display: "flex",
@@ -360,7 +395,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
                 key={action.name}
                 icon={action.icon}
                 tooltipTitle={action.name}
-                onClick={() => {handleClose;handleActions(action.action);}}
+                onClick={() => {handleActions(action.action);}}
                 tooltipPlacement='top'
               />
             ))}
@@ -370,10 +405,10 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
           size='large'
           variant="contained"
           color="success"
-          disabled={!isTransactionCompleted}
-          onClick={() => { setIsModalOpen(true);}}
+          // disabled={!isTransactionCompleted}
+          onClick={() => { proceedTransaction();}}
           startIcon={<ShoppingCartCheckoutIcon />}>
-              <NumericFormat value={getGrandTotal(products)} displayType="text" thousandSeparator="." decimalSeparator="," prefix={' IDR '}/>
+              <NumericFormat value={getGrandTotal(products, disc)} displayType="text" thousandSeparator="." decimalSeparator="," prefix={' IDR '}/>
           </Button>
       </Stack>
       {/* ConfirmTransaction Modal */}
@@ -394,21 +429,17 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       />
 
       <NoteModal
-        isModalOpen={isNoteModalOpen}
         note={note}
-        onCloseModal={() => setIsModalNoteOpen(false)} // Close modal handler
-        onSaveNote={(updatedNote) => {
-          onUpdateTransactionNote(updatedNote); // Update the note in the parent component's state
-      }}
+        isModalOpen={isNoteModalOpen}
+        onCloseModal={() => setNoteModalState(false)} // Close modal handler
+        onSaveNote={handleUpdateTransactionNote} // Update the note in the parent component's state
       />
 
       <DiscountModal
+        discount={disc}
         isModalOpen={isDiscModalOpen}
-        discount={discount}
-        onCloseModal={() => setIsDiscModalOpen(false)} // Close modal handler
-        onSaveDiscount={(updatedDiscount) => {
-          setDiscount(updatedDiscount); // Update the note in the parent component's state
-        }}
+        onCloseModal={() => setDiscountModalState(false)} // Close modal handler
+        onSaveDiscount={handleUpdateTransactionDiscount} // Update the note in the parent component's state
       />
 
       <Snackbar

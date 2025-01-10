@@ -152,7 +152,9 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 
 	return (
 		<Dialog open={isModalOpen} onClose={onCloseModal} fullWidth={true}>
-			<DialogTitle>Select Payment Method</DialogTitle>
+			<DialogTitle>
+			<NumericFormat value={cashAmount} displayType="input" thousandSeparator="." decimalSeparator="," prefix={'IDR '} customInput={TextField} disabled />
+			</DialogTitle>
 			<DialogContent>
 				<Box>
 					<Stack spacing={2}>
@@ -173,7 +175,7 @@ const ConfirmTransaction: React.FC<ConfirmTransactionProps> = ({
 						</Box>
 						<Box>
             <Stack spacing={2}>
-            <NumericFormat value={cashAmount} displayType="input" thousandSeparator="." decimalSeparator="," prefix={'IDR '} customInput={TextField} disabled />
+            
             <Stack spacing={1} direction="row">
 								<Chip label="20.000" onClick={() => handleMoneyChipClick("20000")} color="success" disabled={paymentMethodId!==1} />
 								<Chip label="50.000" onClick={() => handleMoneyChipClick("50000")} color="primary" disabled={paymentMethodId!==1}/>

@@ -40,3 +40,17 @@
 .read-the-docs {
   color: #888;
 }
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr; /* Default to 1 column */
+  gap: 16px; /* Add space between items */
+  padding: 16px;
+}
+
+/* For tablets in landscape mode and larger devices */
+@media (min-width: 768px) and (orientation: landscape) {
+  .grid-container {
+      grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  }
+}

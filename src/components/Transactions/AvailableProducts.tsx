@@ -11,6 +11,7 @@ import { ImageListItemBar, Menu, MenuItem, MenuList } from '@mui/material';
 import IconButton from '@mui/material/IconButton';
 import Grid from '@mui/material/Grid2'
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import { NumericFormat } from 'react-number-format';
 // import Menu from '../common/Menu';
 
 interface AvailableProduct {
@@ -50,7 +51,7 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({
 			width: '100% !important', // Overrides inline-style
 			height: 100,
 		},
-		'&:hover, &.Mui-focusVisible': {
+		'&.Mui-focusVisible': {
 			zIndex: 1,
 			'& .MuiImageBackdrop-root': {
 				opacity: 0.15,
@@ -84,16 +85,6 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({
 		bottom: 0,
 		backgroundColor: theme.palette.common.black,
 		opacity: 0.4,
-		transition: theme.transitions.create('opacity'),
-	}));
-
-	const ImageMarked = styled('span')(({ theme }) => ({
-		height: 3,
-		width: 18,
-		backgroundColor: theme.palette.common.white,
-		position: 'absolute',
-		bottom: -2,
-		left: 'calc(50% - 9px)',
 		transition: theme.transitions.create('opacity'),
 	}));
 
@@ -164,15 +155,15 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({
           height: 500
          // justifyContent="flex-end" # DO NOT USE THIS WITH 'scroll'
         }}>
-					<ImageList cols={5} rowHeight={'auto'}>
+					<ImageList cols={3} rowHeight={'auto'}>
 					{availableProducts.filter((product) =>
 								product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
 								product.category.toLowerCase().includes(searchQuery.toLowerCase())
 							).map((product) => (
 							<ImageListItem key={product.id}>
-								<ImageButton focusRipple>
+								<ImageButton focusRipple onClick={() => onAddProduct(product)}>
 									<ImageBackdrop className="MuiImageBackdrop-root" />
-									<Image onClick={() => onAddProduct(product)}>
+									<Image>
 										<Typography
 											component="span"
 											variant="subtitle1"
@@ -185,10 +176,11 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({
 											})}
 										>
 											{product.name}
-											<ImageMarked className="MuiImageMarked-root" />
 										</Typography>
 									</Image>
-									<ImageListItemBar subtitle={product.price}/>
+									<ImageListItemBar subtitle={
+										<NumericFormat value={product.price} displayType="text" thousandSeparator="." decimalSeparator="," prefix={'IDR '}/>
+									}/>
 								</ImageButton>
 							</ImageListItem>
 						))}

@@ -1,5 +1,5 @@
 import { Button, ButtonBase, Chip, Dialog, DialogActions, DialogContent, DialogTitle, ImageList, ImageListItem, List, Stack, TextField, Typography, styled  } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface DiscountProps {
 	discount: string;
@@ -17,8 +17,17 @@ const DiscountModal: React.FC<DiscountProps> = ({
 
 	const [localDiscount, setDiscount] = useState(discount); // Local state for the note
 
+	useEffect(() => {
+		setDiscount(discount); // Update localDiscount when the modal opens
+	}, [discount]);
+
 	const handleSave = () => {
 		onSaveDiscount(localDiscount); // Call the callback with the updated note
+		onCloseModal(); // Close the modal
+	};
+
+	const handleClose = () => {
+		setDiscount("0"); // Call the callback with the updated note
 		onCloseModal(); // Close the modal
 	};
 
@@ -71,12 +80,12 @@ const DiscountModal: React.FC<DiscountProps> = ({
 		{label:"first", numbers:["1","2","3"]},
 		{label:"second", numbers:["4","5","6"]},
 		{label:"third", numbers:["7","8","9"]},
-		{label:"last", numbers:["*", "0", "00"]},
+		{label:"last", numbers:["*", "0", "Clear"]},
 	];
 
 	const handleNumberPadClick = (value: string) => {
-		if(value==="*" || value==="00"){
-			//handleClearCash();
+		if(value==="*" || value==="Clear"){
+			setDiscount("");
 			return;
 		}
 		setDiscount(
@@ -111,9 +120,9 @@ return (
 						<ImageList cols={3} key={numbers.label}>
 							{numbers.numbers.map((number) => (
 							<ImageListItem key={number}>
-								<ImageButton disabled={number===""}>
+								<ImageButton disabled={number===""} onClick={() => handleNumberPadClick(number)}>
 									<ImageBackdrop />
-									<Image onClick={() => handleNumberPadClick(number)}>
+									<Image>
 										<Typography
 											component="span"
 											variant="subtitle1"
@@ -136,7 +145,7 @@ return (
 				</List>
 				</DialogContent>
 				<DialogActions>
-					<Button onClick={onCloseModal}>Cancel</Button>
+					<Button onClick={handleClose}>Cancel</Button>
 					<Button onClick={handleSave}>Tambah</Button>
 				</DialogActions>
 		</Dialog>

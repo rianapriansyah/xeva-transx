@@ -2,14 +2,18 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setSelectedStore } from '../../services/storeSlice';
 import { MenuList } from '@mui/material';
+import { useState } from 'react';
+import { RootState } from '../../services/store';
 
 const availableStores = [{id:1, name:"Xeva"},{id:2, name:"Omanya"}];
 
 export default function BasicMenu() {
-  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedMenu, setSelectedMenu]=useState(selectedStore?.name);
   const openMenu = Boolean(anchorEl);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -29,8 +33,8 @@ export default function BasicMenu() {
       <Button 
         onClick={handleClick}
         >
-          Select Store
-        </Button>
+        Store
+      </Button>
       <Menu
         id="basic-menu"
         anchorEl={anchorEl}
@@ -50,7 +54,9 @@ export default function BasicMenu() {
       >
         {availableStores.map((store)=>(
           <MenuList key={store.id}>
-            <MenuItem onClick={()=>handleStoreSelect(store)}>{store.name}</MenuItem>
+            <MenuItem onClick={()=>{handleStoreSelect(store);setSelectedMenu(store.name);}} 
+              selected={selectedMenu===store.name}
+            >{store.name}</MenuItem>
           </MenuList >
         ))}
       </Menu>

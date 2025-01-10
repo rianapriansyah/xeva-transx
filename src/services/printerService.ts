@@ -19,6 +19,18 @@ interface ReceiptDetails {
 	discount:string;
 }
 
+interface PrinterSetting{
+	name:string;
+	service:string;
+	characteristics:string;
+}
+
+const definedPrinter:PrinterSetting={
+	name:"RPP02N",
+	service:"e7810a71-73ae-499d-8c15-faa9aef0c3f2",
+	characteristics:"bef8d6c9-9c21-4c9e-b632-bd58c1009f9f"
+}
+
 /**
  * PrinterService class for managing Bluetooth printer connection and printing
  */
@@ -33,20 +45,12 @@ class PrinterService {
 	 */
 	async connect(): Promise<void> {
 		try {
-			const devices =  await navigator.bluetooth.getDevices();
-
-			if(devices.filter(name=>name.name=="RPP02N").length==0){
-				// Request the device
-				this.device = await navigator.bluetooth.requestDevice({
-					filters: [
-						{ namePrefix: 'RPP02N' },
-						{ services: ['e7810a71-73ae-499d-8c15-faa9aef0c3f2']}
-					]
-				});
-			}
-			else{
-				this.device = devices.find(name=>name.name=="RPP02N") || null;
-			}
+			this.device = await navigator.bluetooth.requestDevice({
+				filters: [
+					{ namePrefix: definedPrinter.name },
+					{ services: [definedPrinter.service]}
+				]
+			});
 
 			this.device?.addEventListener('gattserverdisconnected', this.onDisconnected);
 
@@ -59,8 +63,8 @@ class PrinterService {
 			console.log('Connected to GATT server:', server);
 
 			// Get the desired service and characteristic
-			this.service = await server.getPrimaryService('e7810a71-73ae-499d-8c15-faa9aef0c3f2'); // Replace with your printer's service UUID
-			this.characteristic = await this.service.getCharacteristic('bef8d6c9-9c21-4c9e-b632-bd58c1009f9f'); // Replace with your printer's characteristic UUID
+			this.service = await server.getPrimaryService(definedPrinter.service); // Replace with your printer's service UUID
+			this.characteristic = await this.service.getCharacteristic(definedPrinter.characteristics); // Replace with your printer's characteristic UUID
 
 			console.log('Connected to service and characteristic');
 			} catch (error) {

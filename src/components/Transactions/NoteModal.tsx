@@ -1,11 +1,11 @@
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField  } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface NoteProps {
 	note:string;
-    isModalOpen: boolean;
-    onCloseModal: () => void;
-    onSaveNote: (note: string) => void; // Callback for saving the note
+  isModalOpen: boolean;
+  onCloseModal: () => void;
+  onSaveNote: (note: string) => void; // Callback for saving the note
 }
 
 const NoteModal: React.FC<NoteProps> = ({
@@ -17,9 +17,13 @@ const NoteModal: React.FC<NoteProps> = ({
 
   const [localNote, setLocalNote] = useState(note); // Local state for the note
 
+  useEffect(() => {
+    setLocalNote(note); // Update setLocalNote when the modal opens
+  }, [note]);
+
   const handleSave = () => {
+    setLocalNote(localNote); // 
     onSaveNote(localNote); // Call the callback with the updated note
-    onCloseModal(); // Close the modal
   };
 
 return (

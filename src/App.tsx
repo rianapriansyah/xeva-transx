@@ -1,12 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import UserManagement from './UserManagement';
-import ProductList from './components/Transactions/ProductList';
+import ProductList from './components/Product/ProductList';
 import TransactionMain from './components/Transactions/TransactionMain';
-import HistoryTransactions from './components/Transactions/HistoryTransactions';
 import Dashboard from './components/Transactions/Dashboard';
 import AppTheme from './theme/AppTheme';
-import { AppBar, Box, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, styled, Toolbar } from '@mui/material';
+import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Stack, styled, Toolbar } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Typography from '@mui/material/Typography';
 import InventoryIcon from '@mui/icons-material/Inventory';
@@ -16,9 +14,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { useSelector } from 'react-redux';
 import { RootState } from '../src/services/store'; // Import the state type
 import Menu from './components/common/Menu';
+import ProtectedRoute from './ProtectedRoute';
+import { PERMISSIONS } from './constants/permissions';
+import RoleSelector from './components/RoleSelector';
 
-// Placeholder components
-const PaymentMethodManagement = () => <div>Payment Method Management Screen</div>;
 const Settings = () => <div>Settings Screen</div>;
 
 interface ListItemLinkProps {
@@ -27,59 +26,70 @@ interface ListItemLinkProps {
   to: string;
 }
 
-function ListItemLink(props: ListItemLinkProps) {
-  const { icon, primary, to } = props;
-
-  return (
-    <ListItemButton component={Link} to={to}>
-      {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
-      <ListItemText primary={primary} />
-    </ListItemButton>
-  );
-}
-
 const menus  = [
   {
     title: 'Transaction',
     element: <TransactionMain />,
     path: '/transactions',
-    icon: <PointOfSaleIcon />
+    icon: <PointOfSaleIcon />,
+    permission: PERMISSIONS.TRANSACTIONS,
+    roles: ['admin', 'cashier'], // Allowed roles
   },
   {
     title: 'Product',
     element: <ProductList />,
     path: '/products',
-    icon: <InventoryIcon />
+    icon: <InventoryIcon />,
+    permission: PERMISSIONS.TRANSACTIONS,
+    roles: ['admin'], // Allowed roles
   },
   {
     title: 'Dashboard',
     element: <Dashboard />,
     path: '/dashboard',
-    icon: <DashboardIcon />
+    icon: <DashboardIcon />,
+    permission: PERMISSIONS.TRANSACTIONS,
+    roles: ['admin'], // Allowed roles
   },
   {
     title: 'Settings',
     element: <Settings />,
-    path: '/analytics',
-    icon: <SettingsIcon />
+    path: '/settings',
+    icon: <SettingsIcon />,
+    permission: PERMISSIONS.TRANSACTIONS,
+    roles: ['admin'], // Allowed roles
   }
 ];
 
 const App: React.FC = () => {
+  const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
+  const userRole = useSelector((state: RootState) => state.user.role); // Get the user's role from Redux
+  const accessibleMenus = menus.filter((menu) => menu.roles.includes(userRole));
   const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [selectedMenu, setSelectedMenu]=useState("");
 
   const toggleDrawer = (newOpen: boolean) => () => {
     setOpen(newOpen);
   };
+
+  function ListItemLink(props: ListItemLinkProps) {
+    const { icon, primary, to } = props;
   
-  const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
+    return (
+      <ListItemButton component={Link} to={to} onClick={()=>setSelectedMenu(primary)} selected={selectedMenu===primary}>
+        {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
+        <ListItemText primary={primary} />
+      </ListItemButton>
+    );
+  }
 
   return (
     <AppTheme>
       <Router>
       <AppBar position="fixed">
-        <Toolbar>
+        <Toolbar variant="dense">
+        
           <IconButton
             size="large"
             edge="start"
@@ -94,24 +104,38 @@ const App: React.FC = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {selectedStore?.name}
           </Typography>
-          <Menu>
-
-          </Menu>
+          <Stack spacing={2} direction="row">
+          <RoleSelector />
+          <Divider orientation="vertical" />
+          <Menu/>
+          </Stack>
+          
         </Toolbar>
       </AppBar>
       <Drawer open={open} onClose={toggleDrawer(false)}>
       <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
       <List>
-        {menus.map((menu) => (
+        {accessibleMenus.map((menu) => (
           <ListItem key={menu.title} disablePadding>
-            <ListItemLink to={menu.path} primary={menu.title} icon={menu.icon}/>
+            <ListItemLink to={menu.path} primary={menu.title} icon={menu.icon} />
           </ListItem>
         ))}
+        
       </List>
+      
         </Box>
       </Drawer>
       <Offset />
-        <Routes>
+      <Routes>
+        {menus.map((menu) => (
+            <Route key={menu.title} path={menu.path} element={
+                <ProtectedRoute permission={menu.permission}>
+                    {menu.element}
+                </ProtectedRoute>
+            } />
+        ))}
+      </Routes>
+        {/* <Routes>
           <Route path="/user-management" element={<UserManagement />} />
           <Route path="/products" element={<ProductList />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -119,7 +143,7 @@ const App: React.FC = () => {
           <Route path="/transactions" element={<TransactionMain />} />
           <Route path="/history-transactions" element={<HistoryTransactions />} />
           <Route path="/" element={<div>Welcome to the Coffee Shop Management App</div>} />
-        </Routes>
+        </Routes> */}
       </Router>
     </AppTheme>
   );

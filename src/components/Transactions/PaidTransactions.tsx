@@ -7,16 +7,16 @@ import { NumericFormat } from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/store';
 
-interface UnpaidTransactionsProps {
-  unpaidTransactions:Transaction[];
+interface PaidTransactionsProps {
+  paidTransactions:Transaction[];
 	onSelectTransaction: (transaction: Transaction) => void;
 }
 
-const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({ 
-  unpaidTransactions,
+const PaidTransactions: React.FC<PaidTransactionsProps> = ({ 
+  paidTransactions,
 	onSelectTransaction
 }) => {
-	
+
 	const userRole = useSelector((state: RootState) => state.user.role); // Get the user's role from Redux
 	const StyledTableRow = styled(TableRow)(({ theme }) => ({
     '&:nth-of-type(odd)': {
@@ -42,7 +42,7 @@ const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({
 		<React.Fragment>
 			<Stack direction={"row"}>
 			<Typography variant="h5" gutterBottom>
-				Transaksi Belum Terbayar
+				Transaksi Hari Ini
 			</Typography>
 			<Button >
 				<RefreshIcon/>
@@ -60,14 +60,14 @@ const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({
 						<TableHead>
 							<TableRow>
 								<StyledTableCell>Nama Pemesan</StyledTableCell>
-								<StyledTableCell>Nominal Pesanan</StyledTableCell>
+								<StyledTableCell>Nominal</StyledTableCell>
 								<StyledTableCell>Waktu Pesanan</StyledTableCell>
 								<StyledTableCell>Yang Melayani</StyledTableCell>
 								<StyledTableCell align="center">Aksi</StyledTableCell>
 							</TableRow>
 						</TableHead>
 						<TableBody>
-						{unpaidTransactions.map((transaction) => (
+						{paidTransactions.map((transaction) => (
 							<StyledTableRow  key={transaction.id}>
 								<StyledTableCell>
 									{transaction.guestName}
@@ -90,11 +90,8 @@ const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({
 										aria-label="action button"
 									>
 										<ToggleButton value="down" onClick={() => onSelectTransaction(transaction)}>
-											Masukkan ke pesanan
-										</ToggleButton>                      
-										{/* <ToggleButton value="delete" onClick={() => alert(transaction.guestName)}>
-											<DeleteOutlineIcon color='error' />
-										</ToggleButton> */}
+											Lihat Detail
+										</ToggleButton>       
 									</ToggleButtonGroup>
 								</StyledTableCell>
 							</StyledTableRow >
@@ -107,4 +104,4 @@ const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({
 	);
 };
 
-export default UnpaidTransactions;
+export default PaidTransactions;
