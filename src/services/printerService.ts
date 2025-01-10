@@ -8,6 +8,18 @@ const textToDataView = (value: string): DataView => {
 		return new DataView(Uint8Array.from(newValue).buffer);
 };
 
+const formattedDate=()=>{
+	const date = new Date();
+
+	const day = date.getDate();
+  const month = date.toLocaleString('default', { month: 'long' });
+  const year = date.getFullYear();
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+
+	return `${day} ${month} ${year}, ${hours}:${minutes}`;
+	}
+
 /**
  * Interface for the receipt details
  */
@@ -17,6 +29,7 @@ interface ReceiptDetails {
 	selectedProducts: { name: string; quantity: number; price: number }[];
 	cashierName: string;
 	discount:string;
+	paid:string;
 }
 
 interface PrinterSetting{
@@ -101,75 +114,80 @@ class PrinterService {
 	 * @throws Error if printing fails
 	 */
 	async printReceipt(details: ReceiptDetails): Promise<void> {
-		if (!this.characteristic) {
-				throw new Error('Printer is not connected.');
-		}
+    if (!this.characteristic) {
+        throw new Error('Printer is not connected.');
+    }
 
-		const { shopName, guestName, selectedProducts, cashierName, discount } = details;
+    const { shopName, selectedProducts, cashierName, discount, paid } = details;
 
-		const boldOn = new Uint8Array([27, 69, 1]);
-		const boldOff = new Uint8Array([27, 69, 0]);
-		const left = new Uint8Array([27, 97, 0]);
-		const center = new Uint8Array([27, 97, 1]);
-		const right = new Uint8Array([27, 97, 2]);
-		const lineFeed = new Uint8Array([10]);
-		const underLine = textToDataView('-'.repeat(30));
-		const newEmptyLine = textToDataView(`${' '.repeat(18)}\n`);
-		const currentDate = `${new Date().getDate()}/${new Date().getMonth() + 1}/${new Date().getFullYear()}`;
+    const boldOn = new Uint8Array([27, 69, 1]);
+    const boldOff = new Uint8Array([27, 69, 0]);
+    const left = new Uint8Array([27, 97, 0]);
+    const center = new Uint8Array([27, 97, 1]);
+    const cutter = new Uint8Array([29, 86, 0]);
+    const lineFeed = new Uint8Array([10]);
+    const underLine = textToDataView('='.repeat(48));
+		const newEmptyLine = textToDataView(' '.repeat(48));
+    const currentDate = formattedDate(); // Ensure formattedDate returns the desired format (DD Month YYYY, HH:MM)
 
-		try {
-			await this.characteristic.writeValue(new DataView(boldOn.buffer));
-			await this.characteristic.writeValue(new DataView(center.buffer));
-			await this.characteristic.writeValue(textToDataView(shopName)); // Header
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(new DataView(boldOff.buffer));
-			await this.characteristic.writeValue(underLine);
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(new DataView(right.buffer));
-			await this.characteristic.writeValue(textToDataView(currentDate)); //date
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(new DataView(left.buffer));
+    try {
+        // Header: Shop Name
+        await this.characteristic.writeValue(new DataView(center.buffer));
+        await this.characteristic.writeValue(new DataView(boldOn.buffer));
+        await this.characteristic.writeValue(textToDataView(`${shopName}\n\n`));
+        await this.characteristic.writeValue(new DataView(boldOff.buffer));
 
+        // Date
+        await this.characteristic.writeValue(textToDataView(`${currentDate}\n`));
+        await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+        await this.characteristic.writeValue(underLine);
 
-			await this.characteristic.writeValue(textToDataView(`Customer: ${guestName}`));
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+        // Product Details
+        let total = 0;
+        for (const product of selectedProducts) {
+						const productLine = `${product.quantity} x ${product.price.toLocaleString('id-ID')}`;
+            const productTotal = (product.quantity * product.price);
+            await this.characteristic.writeValue(new DataView(left.buffer));
+            await this.characteristic.writeValue(textToDataView(`${product.name}\n`));
+            await this.characteristic.writeValue(textToDataView(`${productLine}`.padEnd(38, '.') + `Rp ${productTotal.toLocaleString('id-ID')}\n`));
+            total += product.quantity * product.price;
+        }
+        await this.characteristic.writeValue(underLine);
 
-			for (const product of selectedProducts) {
-				await this.characteristic.writeValue(new DataView(left.buffer));
-				const productLine = `${product.name.padEnd(12)}`;
-				await this.characteristic.writeValue(textToDataView(productLine));
+        // Totals
+        const discountValue = total * (Number(discount) / 100);
+        const grandTotal = total - discountValue;
+        await this.characteristic.writeValue(new DataView(left.buffer));
+        await this.characteristic.writeValue(textToDataView(`Total`.padEnd(38) + `Rp ${total.toLocaleString('id-ID')}\n`));
+        await this.characteristic.writeValue(textToDataView(`Disc ${discount}%`.padEnd(38) + `Rp ${discountValue.toLocaleString('id-ID')}\n`));
+        await this.characteristic.writeValue(textToDataView(`Gr. Total`.padEnd(38) + `Rp ${grandTotal.toLocaleString('id-ID')}\n`));
+        await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+
+        // Payment Status
+        const paymentStatus = paid ? '-- LUNAS --' : '--Belum Bayar--';
+        await this.characteristic.writeValue(new DataView(center.buffer));
+        await this.characteristic.writeValue(textToDataView(`${paymentStatus}\n\n`));
+
+        // Footer: Cashier Name
+        await this.characteristic.writeValue(new DataView(left.buffer));
+        await this.characteristic.writeValue(textToDataView(`Kasir : ${cashierName}\n\n`));
+        await this.characteristic.writeValue(new DataView(center.buffer));
+        await this.characteristic.writeValue(textToDataView(`Sober & Chill\n~~~~~~~~~~~~~~~~~\n`));
+        await this.characteristic.writeValue(newEmptyLine);
 				await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+				await this.characteristic.writeValue(newEmptyLine);
+				await this.characteristic.writeValue(newEmptyLine);
+				await this.characteristic.writeValue(newEmptyLine);
+				await this.characteristic.writeValue(cutter);
+        await this.characteristic.writeValue(new DataView(lineFeed.buffer));
 
-				await this.characteristic.writeValue(new DataView(right.buffer));
-				const productDetailLine = `${"".padEnd(12)} ${product.quantity} x ${product.price} = ${product.quantity * product.price}`;
-				await this.characteristic.writeValue(textToDataView(productDetailLine));
-				await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			}
-			
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(new DataView(left.buffer));
-			await this.characteristic.writeValue(textToDataView(`Qty: ${selectedProducts.reduce((sum, product) => sum + product.quantity, 0)}`));
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(textToDataView(`Total: Rp. ${selectedProducts.reduce((sum, product) => sum + product.price * product.quantity, 0)}`));
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(textToDataView(`Discount: ${discount} %`));
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(newEmptyLine);
-			await this.characteristic.writeValue(new DataView(left.buffer));
-			await this.characteristic.writeValue(textToDataView(`Cashier : ${cashierName}`));
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(new DataView(center.buffer));			
-			await this.characteristic.writeValue(textToDataView('---Thank you---'));
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
-			await this.characteristic.writeValue(newEmptyLine);
-			await this.characteristic.writeValue(new DataView(lineFeed.buffer));
+        console.log('Receipt printed successfully!');
+    } catch (error) {
+        console.error('Error during printing:', error);
+        throw new Error('Failed to print the receipt.');
+    }
+}
 
-			console.log('Receipt printed successfully!');
-		} catch (error) {
-			console.error('Error during printing:', error);
-			throw new Error('Failed to print the receipt.');
-		}
-	}
 }
 
 export default PrinterService;

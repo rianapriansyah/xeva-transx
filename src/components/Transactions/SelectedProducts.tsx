@@ -61,11 +61,6 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
   const handleCloseSnack = () => setOpenSnack(false);
 
   const handlePrint = async (fromSpeedDial:boolean) => {
-    if(fromSpeedDial&&tableNo===""&&guestName===""){
-      triggerSnack("Silakan masukkan nomor meja dan nama pemesan");
-      return;
-    }
-
     try {
       triggerSnack("Mencetak");
       await printerService.connect();
@@ -79,7 +74,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             price: detail.price, // Price of the product
             total: detail.price * detail.quantity
           })),
-
+          paid: fromSpeedDial ? "Lunas" : "Belum Bayar",
           discount:disc,
           cashierName: 'chaotic_noobz'
       };
@@ -206,7 +201,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       triggerSnack('Failed to save transaction. Please try again.');
     }
     finally{
-      //handlePrint(false);
+      handlePrint(false);
     }
   };
 

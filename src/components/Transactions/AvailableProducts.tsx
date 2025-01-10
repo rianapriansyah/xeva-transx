@@ -166,7 +166,7 @@ const AvailableProducts: React.FC<AvailableProductsProps> = ({
 									<Image>
 										<Typography
 											component="span"
-											variant="subtitle1"
+											variant="subtitle2"
 											color="inherit"
 											sx={(theme) => ({
 												position: 'relative',
