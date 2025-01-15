@@ -30,7 +30,7 @@ const menus  = [
   {
     title: 'Transaction',
     element: <TransactionMain />,
-    path: '/transactions',
+    path: '/',
     icon: <PointOfSaleIcon />,
     permission: PERMISSIONS.TRANSACTIONS,
     roles: ['admin', 'cashier'], // Allowed roles
@@ -89,7 +89,6 @@ const App: React.FC = () => {
       <Router>
       <AppBar position="fixed">
         <Toolbar variant="dense">
-        
           <IconButton
             size="large"
             edge="start"

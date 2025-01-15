@@ -36,6 +36,7 @@ export interface Category {
   id: number;
   name:string;
   description:string;
+  storeId:number;
 }
 
 export interface Guest {

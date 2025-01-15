@@ -53,7 +53,8 @@ const emptyProduct: Product = {
 const emptyCategory:Category={
 	id: 0,
   name:"",
-  description:""
+  description:"",
+	storeId:0
 };
 
 const ProductList: React.FC = () => {
@@ -83,6 +84,7 @@ const ProductList: React.FC = () => {
 	}, [selectedStore]);
 
 	const handleSaveCategory = async (category: Category) => {
+		category.storeId = selectedStore?.id ?? 1;
 		try {
 			let message = "";
 				if (category.id === 0) {
@@ -174,7 +176,7 @@ const ProductList: React.FC = () => {
 
 	const handleFetchCategory = async () => {
 		try {
-			const data = await fetchCategories();
+			const data = await fetchCategories(selectedStore?.id);
 			const sortedCategories = data.data.sort((a: { name: string; }, b: { name: string; }) => a.name.localeCompare(b.name))
 			setCategories(sortedCategories);
 		} catch (error) {
