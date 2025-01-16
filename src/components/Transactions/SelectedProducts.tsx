@@ -74,7 +74,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
             price: detail.price, // Price of the product
             total: detail.price * detail.quantity
           })),
-          paid: fromSpeedDial ? "Lunas" : "Belum Bayar",
+          paid: fromSpeedDial ? "-- Belum Bayar --" : "-- Lunas --",
           discount:disc,
           cashierName: 'chaotic_noobz'
       };

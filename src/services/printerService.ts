@@ -164,7 +164,7 @@ class PrinterService {
         await this.characteristic.writeValue(new DataView(lineFeed.buffer));
 
         // Payment Status
-        const paymentStatus = paid ? '-- LUNAS --' : '--Belum Bayar--';
+        const paymentStatus = paid;
         await this.characteristic.writeValue(new DataView(center.buffer));
         await this.characteristic.writeValue(textToDataView(`${paymentStatus}\n\n`));
 

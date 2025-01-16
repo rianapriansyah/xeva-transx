@@ -51,24 +51,27 @@ const Dashboard: React.FC = () => {
 			title: 'Total Transaksi',
 			metric: "totalTransactions",
 			value:0,
-			icon : <ShoppingCartIcon />
+			icon : <ShoppingCartIcon />,
+			prefix : ""
 		},
 		{
 			title: 'Pemasukkan',
 			metric: "totalIncome",
 			value:0,
-			icon : <SavingsIcon />
+			icon : <SavingsIcon />,
+			prefix : "IDR "
 		},
 		{
 			title: 'Penjualan Rata-rata',
 			metric: "averageSalePerTransaction",
 			value:0,
-			icon : <FunctionsIcon />
+			icon : <FunctionsIcon />,
+			prefix : "IDR "
 		}
 	];
 
 const chartSetting = {
-  yAxis: [
+  xAxis: [
     {
       label: 'Terjual',
     },
@@ -97,7 +100,7 @@ const chartSetting = {
 						key={data.metric}
 						secondaryAction={<React.Fragment>
 							<Typography variant="button" gutterBottom>
-								{`IDR ${data.value.toLocaleString("id-ID")}`}
+								{`${data.prefix} ${data.value.toLocaleString("id-ID")}`}
 							</Typography>
 						</React.Fragment>}
 					>
@@ -129,9 +132,14 @@ const chartSetting = {
 				/>
 				</Grid>
 				<BarChart
-					layout='horizontal'
+						margin={{
+							left: 170,
+							right: 10,
+						}}
 					dataset={productsSoldData}
-					xAxis={[{ scaleType: 'band', dataKey: 'productName', tickPlacement:"middle", tickInterval:'auto' }]}
+					// yAxis={[{ scaleType: 'band', dataKey: 'month' }]}
+					yAxis={[{ scaleType: 'band', dataKey: 'productName' }]}
+					layout='horizontal'
 					{...chartSetting}
 				/>
 			</Box>
