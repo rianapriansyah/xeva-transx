@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Avatar, Box, List, ListItem, ListItemAvatar, ListItemText, styled, Typography } from '@mui/material';
-import { axisClasses, BarChart, LineChart } from '@mui/x-charts';
+import { BarChart, LineChart } from '@mui/x-charts';
 import Grid from '@mui/material/Grid2'
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/store';
@@ -8,7 +8,6 @@ import { fetchCategories, fetchDashboardData, fetchIncome, fetchProductsSoldData
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SavingsIcon from '@mui/icons-material/Savings';
 import FunctionsIcon from '@mui/icons-material/Functions';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { Category } from '../../types/interfaceModel';
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
 import MuiAccordionSummary, {
