@@ -4,17 +4,28 @@ import { axisClasses, BarChart, LineChart } from '@mui/x-charts';
 import Grid from '@mui/material/Grid2'
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/store';
-import { fetchDashboardData, fetchIncome, fetchProductsSoldData } from '../../services';
+import { fetchCategories, fetchDashboardData, fetchIncome, fetchProductsSoldData } from '../../services';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import SavingsIcon from '@mui/icons-material/Savings';
 import FunctionsIcon from '@mui/icons-material/Functions';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { Category } from '../../types/interfaceModel';
+import MuiAccordion, { AccordionProps } from '@mui/material/Accordion';
+import MuiAccordionSummary, {
+  AccordionSummaryProps,
+  accordionSummaryClasses,
+} from '@mui/material/AccordionSummary';
+import MuiAccordionDetails from '@mui/material/AccordionDetails';
+import ArrowForwardIosSharpIcon from '@mui/icons-material/ArrowForwardIosSharp';
 
 const Dashboard: React.FC = () => {
 	const selectedStore = useSelector((state: RootState) => state.store.selectedStore);
 	const Offset = styled('div')(({ theme }) => theme.mixins.toolbar);
 	const [dashboardData, setData] = useState<any>([]);
 	const [incomeData, setIncomeData] = useState([]);
-	const [productsSoldData, setProductSoldData] = useState([]);
+	const [productsSoldData, setProductSoldData] = useState<any>([]);
+	const [categories, setCategories] = useState<Category[]>([]);
+	const [expanded, setExpanded] = React.useState<string | false>('');
 	
 	const fetchSummaryData = async (storeId: any, filter: string, startDate?: string, endDate?: string) => {
     const response = await fetchDashboardData(storeId, filter, startDate, endDate);
@@ -26,6 +37,16 @@ const Dashboard: React.FC = () => {
 		setData(dashboardDataArray);
 	};
 
+	const handleFetchCategory = async () => {
+			try {
+				const data = await fetchCategories(selectedStore?.id);
+				const sortedCategories = data.data.sort((a: { name: string; }, b: { name: string; }) => a.name.localeCompare(b.name))
+				setCategories(sortedCategories);
+			} catch (error) {
+				console.error('Error fetching categories:', error);
+			}
+		};
+
 	const fetchIncomeData = async (storeId: any, filter: string, startDate?: string, endDate?: string) => {
     const response = await fetchIncome(storeId, filter, startDate, endDate);
 		setIncomeData(response.data);
@@ -33,6 +54,7 @@ const Dashboard: React.FC = () => {
 
 	const fetchProductsSold = async (storeId: any, filter: string, startDate?: string, endDate?: string) => {
     const response = await fetchProductsSoldData(storeId, filter, startDate, endDate);
+		console.log(response.data);
 		setProductSoldData(response.data);
 	};
 	
@@ -40,6 +62,7 @@ const Dashboard: React.FC = () => {
 		fetchSummaryData(selectedStore?.id, '');
 		fetchIncomeData(selectedStore?.id, 'thismonth')
 		fetchProductsSold(selectedStore?.id, '')
+		handleFetchCategory();
 		// fetchTransactionData();
 	}, [selectedStore]);
 
@@ -70,20 +93,52 @@ const Dashboard: React.FC = () => {
 		}
 	];
 
-const chartSetting = {
-  xAxis: [
-    {
-      label: 'Terjual',
-    },
-  ],
-  series: [{ dataKey: 'quantitySold', label: 'Main Dish terjual' }],
-  height: 300,
-  sx: {
-    [`& .${axisClasses.directionY} .${axisClasses.label}`]: {
-      transform: 'translateX(-10px)',
-    },
-  },
-};
+	const chartSetting = {
+		series: [{ dataKey: 'quantitySold' }],
+		height: 400,
+	};
+
+	const Accordion = styled((props: AccordionProps) => (
+		<MuiAccordion disableGutters elevation={0} square {...props} />
+	))(({ theme }) => ({
+		border: `1px solid ${theme.palette.divider}`,
+		'&:not(:last-child)': {
+			borderBottom: 0,
+		},
+		'&::before': {
+			display: 'none',
+		},
+	}));
+	
+	const AccordionSummary = styled((props: AccordionSummaryProps) => (
+		<MuiAccordionSummary
+			expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: '0.9rem' }} />}
+			{...props}
+		/>
+	))(({ theme }) => ({
+		backgroundColor: 'rgba(0, 0, 0, .03)',
+		flexDirection: 'row-reverse',
+		[`& .${accordionSummaryClasses.expandIconWrapper}.${accordionSummaryClasses.expanded}`]:
+			{
+				transform: 'rotate(90deg)',
+			},
+		[`& .${accordionSummaryClasses.content}`]: {
+			marginLeft: theme.spacing(1),
+		},
+		...theme.applyStyles('dark', {
+			backgroundColor: 'rgba(255, 255, 255, .05)',
+		}),
+	}));
+	
+	const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
+		padding: theme.spacing(2),
+		borderTop: '1px solid rgba(0, 0, 0, .125)',
+	}));
+
+  const handleChange =
+    (panel: string) => (_event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded(newExpanded ? panel : false);
+    };
 
 	return (
 		<Grid>
@@ -131,17 +186,38 @@ const chartSetting = {
 					height={300}
 				/>
 				</Grid>
-				<BarChart
+				<List>
+					{categories.map((category)=>(
+						 <Accordion expanded={expanded === category.name} onChange={handleChange(category.name)} key={category.id}>
+							<AccordionSummary aria-controls="panel1d-content" id="panel1d-header">
+								<Typography component="span">{category.name}</Typography>
+							</AccordionSummary>
+							<AccordionDetails>
+								<BarChart
+									margin={{ top: 5, right: 10, bottom: 80, left: 170}}
+									dataset={productsSoldData.filter((x: { categoryName: string; })=>x.categoryName==category.name)}
+									yAxis={[{ scaleType: 'band', dataKey: 'productName', tickPlacement:'middle'}]}
+									layout='horizontal'
+									barLabel="value"
+									xAxis= {[{label: 'Terjual', tickLabelStyle:{fontSize:0}, disableTicks:true } ]}
+									{...chartSetting}
+								/>
+							</AccordionDetails>
+						</Accordion>
+					))}
+				</List>
+				
+				{/* <BarChart
 						margin={{
 							left: 170,
 							right: 10,
 						}}
-					dataset={productsSoldData}
+					dataset={productsSoldData.filter((product)=>product.categoryName.toLowerCase().includes())}
 					// yAxis={[{ scaleType: 'band', dataKey: 'month' }]}
 					yAxis={[{ scaleType: 'band', dataKey: 'productName' }]}
 					layout='horizontal'
 					{...chartSetting}
-				/>
+				/> */}
 			</Box>
 			<Offset />			
 		</Grid>
