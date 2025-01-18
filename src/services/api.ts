@@ -28,11 +28,14 @@ export const updateTransaction = (transactionId: any, transactionData:any) =>
     `${API_BASE_URL}/transactions/${transactionId}`,
     transactionData
   );
+export const deleteTransaction = (transactionId:any) =>
+  axios.delete(`${API_BASE_URL}/transactions/${transactionId}`); 
 
 export const fetchTransaction = (storeId:any) => axios.get(`${API_BASE_URL}/transactions/store/${storeId}`);
 export const fetchUnpaidTransaction = (storeId:any) => axios.get(`${API_BASE_URL}/transactions/store/${storeId}/unpaid`);
 export const fetchTransactionByDate = (storeId:any, date:any) => axios.get(`${API_BASE_URL}/transactions/store/${storeId}/paid/by-date?date=${date}`);
 export const fetchParkedTransactions = () => axios.get(`${API_BASE_URL}/transactions/unpaid`);
+
 
 export const fetchDashboardData  = (storeId: number, filter: string, startDate?: string, endDate?: string) => axios.get(`${API_BASE_URL}/dashboard`, {params: { storeId, filter, startDate, endDate },});
 export const fetchIncome  = (storeId: number, filter: string, startDate?: string, endDate?: string) => axios.get(`${API_BASE_URL}/dashboard/income-by-date`, {params: { storeId, filter, startDate, endDate },});

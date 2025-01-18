@@ -85,7 +85,7 @@ const SelectedProducts: React.FC<SelectedProductsProps> = ({
       alert(error);
       triggerSnack('Failed to print the receipt.');
     }
-};
+  };
 
   const onClearProductsAndTransactions = () => {
     onCancelOrder();

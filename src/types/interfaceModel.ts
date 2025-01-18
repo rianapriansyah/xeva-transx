@@ -74,7 +74,8 @@ export interface TransactionDetail {
 export enum Actions{
   Add = "Tambah",
   Edit = "Ubah",
-  Delete = "Hapus"
+  Delete = "Hapus",
+  Print = "Cetak"
 }
 
 export interface User {

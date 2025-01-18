@@ -1,15 +1,18 @@
 ﻿import React from 'react';
 import Box from '@mui/material/Box';
 import { Button, Paper, Stack, styled, Table, TableBody, TableCell, tableCellClasses, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
-import { Transaction } from '../../types/interfaceModel';
+import { Actions, Transaction } from '../../types/interfaceModel';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { NumericFormat } from 'react-number-format';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/store';
+import SubdirectoryArrowLeftIcon from '@mui/icons-material/SubdirectoryArrowLeft';
+// import LocalPrintshopIcon from '@mui/icons-material/LocalPrintshop';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 
 interface UnpaidTransactionsProps {
   unpaidTransactions:Transaction[];
-	onSelectTransaction: (transaction: Transaction) => void;
+	onSelectTransaction: (transaction: Transaction, action:Actions) => void;
 }
 
 const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({ 
@@ -89,12 +92,15 @@ const UnpaidTransactions: React.FC<UnpaidTransactionsProps> = ({
 										exclusive
 										aria-label="action button"
 									>
-										<ToggleButton value="down" onClick={() => onSelectTransaction(transaction)}>
-											Masukkan ke pesanan
-										</ToggleButton>                      
-										{/* <ToggleButton value="delete" onClick={() => alert(transaction.guestName)}>
-											<DeleteOutlineIcon color='error' />
+										<ToggleButton value="enter" onClick={() => onSelectTransaction(transaction, Actions.Add)}>
+											<SubdirectoryArrowLeftIcon />
+										</ToggleButton>
+										{/* <ToggleButton value="print" onClick={() => onSelectTransaction(transaction, Actions.Print)}>
+											<LocalPrintshopIcon />
 										</ToggleButton> */}
+										<ToggleButton value="delete" onClick={() => onSelectTransaction(transaction, Actions.Delete)}>
+											<DeleteForeverIcon />
+										</ToggleButton>
 									</ToggleButtonGroup>
 								</StyledTableCell>
 							</StyledTableRow >

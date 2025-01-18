@@ -5,9 +5,10 @@ import Grid from '@mui/material/Grid2'
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
 import TransactionMainRight from './TransactionMainRight';
-import { Transaction, Product, Category, TransactionDetailProduct } from '../../types/interfaceModel';
+import { Transaction, Product, Category, TransactionDetailProduct, Actions } from '../../types/interfaceModel';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../services/store';
+import { Snackbar } from '@mui/material';
 
 const newTransactionObj:Transaction={
 	id: 0,
@@ -47,9 +48,15 @@ const TransactionMain: React.FC = () => {
 	});
 	
 	const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+	const [openSnack, setOpenSnack] = React.useState(false);
+	const handleCloseSnack = () => setOpenSnack(false);
+	const [postMessage, setPostMessage] = useState(""); // Modal state
 
 	useEffect(() => {
 		fetchStaticData();
+	}, [selectedStore]);
+
+	useEffect(() => {
 		fetchTransactionData();
 	}, [selectedStore]);
 
@@ -98,16 +105,18 @@ const TransactionMain: React.FC = () => {
 		}
 	};
 
-		// Fetch Paid transactions by todat
-		const fetchTodayPaidTransactions = async () => {
-			try {
-				const today = new Date().toISOString().split('T')[0];
-				const response = await api.fetchTransactionByDate(selectedStore?.id, today);
-				setTransactions(response.data);
-			} catch (error) {
-				console.error('Error fetching transactions:', error);
-			}
-		};
+	// Fetch Paid transactions by todat
+	const fetchTodayPaidTransactions = async () => {
+		try {
+			// const today = new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Makassar', year:'numeric', month:'2-digit',day:'2-digit'}).format(new Date());
+			const today = new Date().toISOString().split('T')[0];
+			console.log(today);
+			const response = await api.fetchTransactionByDate(selectedStore?.id, today);
+			setTransactions(response.data);
+		} catch (error) {
+			console.error('Error fetching transactions:', error);
+		}
+	};
 
 	// Fetch payment methods
 	const fetchPaymentMethods = async () => {
@@ -129,6 +138,21 @@ const TransactionMain: React.FC = () => {
 			quantity: detail.quantity,
 			transactionId:transaction.id
 		})));
+	};
+
+	// Handle action when selecting a parked transaction
+	const handleSelectTransactionWithAction = (transaction: any, action:Actions) => {
+		switch(action){
+			case Actions.Add:
+				handleSelectTransaction(transaction);
+				break;
+			case Actions.Print:
+				alert(action);
+				break;
+			case Actions.Delete:
+				handleDeleteTransaction(transaction);
+				break;
+		}
 	};
 
 	const handleAddProduct = (product: any) => {
@@ -163,9 +187,33 @@ const TransactionMain: React.FC = () => {
 	const handleCancelOrder = () => {
 		setSelectedProducts([]);
 		setTransaction(newTransactionObj);
-		console.log(transactions);
 		// setPaymentMethods([]);
 	};
+
+	const handleDeleteTransaction = async (transaction: Transaction) => {
+		try {
+				if (transaction.id === 0) {
+						console.error('Error delete transaction:', transaction);
+						return;
+				} 
+				await api.deleteTransaction(transaction.id);
+				fetchTransactionData();
+				handleCancelOrder();
+				triggerSnack(`Pesanan atas nama ${transaction.guestName} dihapus!`);
+		} catch (error) {
+				console.error('Error delete product:', error);
+				triggerSnack(`Terjadi kesalahan menghapus pesanan ${transaction.guestName}`);
+		}
+	};
+
+	const triggerSnack = (msg:string) => {
+    setPostMessage(msg);
+    openSnackNotification();
+  };
+
+	const openSnackNotification = () => {
+    setOpenSnack(true);
+  };
 
 	return (
 		<Box component="section" sx={{ flexGrow:1, p: 2, border: '1px dashed grey', borderRadius:"10px" }}>
@@ -189,10 +237,17 @@ const TransactionMain: React.FC = () => {
 						categories={categories}
 						transactions={transactions}
 						unpaidTransactions={unpaidTransactions}
-						onSelectTransaction={handleSelectTransaction}
+						onSelectTransaction={handleSelectTransactionWithAction}
 					/>
 				</Grid>
 			</Grid>
+			<Snackbar
+				autoHideDuration={4000}
+				anchorOrigin={{vertical: 'top', horizontal: 'center' }}
+				open={openSnack}
+				onClose={handleCloseSnack}
+				message={postMessage}
+			/>
 		</Box>
 	);
 };

@@ -53,7 +53,6 @@ const Dashboard: React.FC = () => {
 
 	const fetchProductsSold = async (storeId: any, filter: string, startDate?: string, endDate?: string) => {
     const response = await fetchProductsSoldData(storeId, filter, startDate, endDate);
-		console.log(response.data);
 		setProductSoldData(response.data);
 	};
 	

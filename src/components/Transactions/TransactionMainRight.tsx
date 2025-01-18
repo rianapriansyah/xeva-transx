@@ -3,7 +3,7 @@ import Box from '@mui/material/Box';
 import { Tab, Tabs } from '@mui/material';
 import AvailableProducts from './AvailableProducts';
 import UnpaidTransactions from './UnpaidTransactions';
-import { Transaction, Product, Category } from '../../types/interfaceModel';
+import { Transaction, Product, Category, Actions } from '../../types/interfaceModel';
 import PaidTransactions from './PaidTransactions';
 
 interface TransactionMainRightProps {
@@ -12,7 +12,7 @@ interface TransactionMainRightProps {
 	transactions:Transaction[];
 	unpaidTransactions:Transaction[];
 	onAddProduct: (product: any) => void;
-	onSelectTransaction: (transaction: Transaction) => void;
+	onSelectTransaction: (transaction: Transaction, action:Actions) => void;
 }
 
 const TransactionMainRight: React.FC<TransactionMainRightProps> = ({
